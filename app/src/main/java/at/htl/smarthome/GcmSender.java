@@ -16,6 +16,7 @@
 
 package at.htl.smarthome;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -34,43 +35,55 @@ public class GcmSender {
     private static final String LOG_TAG = GcmSender.class.getSimpleName();
 
     public static void sendMessage(String message) {
-        try {
-            // Prepare JSON containing the GCM message content. What to send and where to send.
-            JSONObject jsonGcmData = new JSONObject();
-            JSONObject jsonData = new JSONObject();
-            jsonData.put("message", message.trim());
-            // What to send in GCM message.
-            jsonGcmData.put("data", jsonData);
-            // Create connection to send GCM Message request.
-            URL url = new URL("https://android.googleapis.com/gcm/send");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("Authorization", "key=" + API_KEY);
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            // Send GCM message content.
-            OutputStream outputStream = conn.getOutputStream();
-            outputStream.write(jsonGcmData.toString().getBytes());
-            // Read GCM response.
-            InputStream inputStream = conn.getInputStream();
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(inputStream));
-            String line;
-            StringBuilder stringBuilder = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            inputStream.close();
+        AsyncTask<String, Void, Void> sendMessageTask = new AsyncTask<String, Void, Void>() {
+            @Override
+            protected Void doInBackground(String... messages) {
+                try {
+                    Log.d(LOG_TAG, "sendMessage() message: " + messages[0]);
+                    // Prepare JSON containing the GCM message content. What to send and where to send.
+                    JSONObject jsonGcmData = new JSONObject();
+                    JSONObject jsonData = new JSONObject();
+                    jsonData.put("message", messages[0]);
 
-            String response = stringBuilder.toString();
-            System.out.println(response);
-            Log.d(LOG_TAG, "sendMessage() " + message);
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, "sendMessage() JsonException:  " + e.getMessage());
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "sendMessage() Exception: " + e.getMessage());
-            e.printStackTrace();
-        }
+                    // What to send in GCM message.
+                    jsonGcmData.put("data", jsonData);
+                    jsonGcmData.put("to", "/topics/global");
+                    // Create connection to send GCM Message request.
+                    URL url = new URL("https://android.googleapis.com/gcm/send");
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Authorization", "key=" + API_KEY);
+                    conn.setRequestProperty("Content-Type", "application/json");
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+                    // Send GCM message content.
+                    OutputStream outputStream = conn.getOutputStream();
+                    outputStream.write(jsonGcmData.toString().getBytes());
+                    Log.d(LOG_TAG, "sendMessage() JSON: " + jsonGcmData.toString());
+                    // Read GCM response.
+                    InputStream inputStream = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(inputStream));
+                    String line;
+                    StringBuilder stringBuilder = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+                    inputStream.close();
+
+                    String response = stringBuilder.toString();
+                    Log.d(LOG_TAG, "sendMessage() response: " + response);
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, "sendMessage() JsonException:  " + e.getMessage());
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "sendMessage() Exception: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                return null;
+            }
+
+        };
+        sendMessageTask.execute(message);
     }
+
 
 }
