@@ -6,14 +6,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.Locale;
 
+import at.htl.smarthome.view.ControlFragment;
+import at.htl.smarthome.view.MainFragment;
 
-public class MainActivity extends ActionBarActivity implements MainFragment.OnFragmentInteractionListener {
+
+public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -84,23 +87,28 @@ public class MainActivity extends ActionBarActivity implements MainFragment.OnFr
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         MainFragment mainFragment;
+        ControlFragment controlFragment;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
             mainFragment = new MainFragment();
+            controlFragment = new ControlFragment();
         }
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
+            if (position == 0) {
+                return mainFragment;
+            } else if (position == 1) {
+                return controlFragment;
+            }
             return mainFragment;
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 1;
+            return 2;
         }
 
         @Override
@@ -110,7 +118,7 @@ public class MainActivity extends ActionBarActivity implements MainFragment.OnFr
                 case 0:
                     return getString(R.string.title_section_main).toUpperCase(l);
                 case 1:
-                    return getString(R.string.title_section2).toUpperCase(l);
+                    return getString(R.string.title_section_control).toUpperCase(l);
                 case 2:
                     return getString(R.string.title_section3).toUpperCase(l);
             }

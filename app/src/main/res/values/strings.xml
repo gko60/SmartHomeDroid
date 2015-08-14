@@ -2,7 +2,7 @@
     <string name="app_name">SmartHome</string>
 
     <string name="title_section_main">Mainfragment</string>
-    <string name="title_section2">Section 2</string>
+    <string name="title_section_control">Gerätesteuerung</string>
     <string name="title_section3">Section 3</string>
 
     <string name="hello_world">Hello world!</string>
@@ -12,4 +12,6 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="bt_send_by_gcm">Send by GCM</string>
+    <string name="tv_temperature_out">29,7°</string>
+    <string name="bt_txt_refresh">Refresh</string>
 </resources>
