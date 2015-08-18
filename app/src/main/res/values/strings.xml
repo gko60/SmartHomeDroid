@@ -5,7 +5,12 @@
     <string name="title_section_control">Gerätesteuerung</string>
     <string name="title_section3">Section 3</string>
 
-    <string name="hello_world">Hello world!</string>
+    <string name="menu_quit">Exit</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_ip">Settings</string>
+    <string name="activity_edit_settings_title">Edit Settings</string>
+    <string name="txt_homematic_ip">IP-Adresse der Homematic:</string>
+    <string name="bt_ok">OK</string>
 
     <string name="action_settings">Settings</string>
 
@@ -14,4 +19,5 @@
     <string name="bt_send_by_gcm">Send by GCM</string>
     <string name="tv_temperature_out">29,7°</string>
     <string name="bt_txt_refresh">Refresh</string>
+    <string name="txt_date_time_default">Samstag 8. August 2015 10:34</string>
 </resources>

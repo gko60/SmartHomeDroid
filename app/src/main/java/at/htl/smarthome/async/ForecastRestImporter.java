@@ -1,6 +1,5 @@
 package at.htl.smarthome.async;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import org.json.JSONException;
@@ -20,17 +19,12 @@ import at.htl.smarthome.repository.WeatherRepository;
  * und im Repository gespeichert
  */
 public class ForecastRestImporter extends AsyncTask<Void, Void, String> {
-
-    private Context context;
-
-    public ForecastRestImporter(Context context) {
-        this.context = context;
-    }
+    private static final String LOG_TAG = ForecastRestImporter.class.getSimpleName();
 
     /**
      * Im Hintergrund JSON-String lesen
      *
-     * @param params
+     * @param params keine
      * @return JSON-String zum Parsen
      */
     @Override
@@ -41,7 +35,7 @@ public class ForecastRestImporter extends AsyncTask<Void, Void, String> {
     /**
      * JSON-String in die drei Tageswerte parsen und in Repository schreiben.
      *
-     * @param jsonString
+     * @param jsonString  JsonString
      */
     @Override
     protected void onPostExecute(String jsonString) {
@@ -52,7 +46,7 @@ public class ForecastRestImporter extends AsyncTask<Void, Void, String> {
             while (days.hasNext()) {
                 String dayString = days.next();
                 JSONObject day = json.getJSONObject(dayString);
-                parseDayIntoRepository(context, dayString, day);
+                parseDayIntoRepository(dayString, day);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -64,12 +58,11 @@ public class ForecastRestImporter extends AsyncTask<Void, Void, String> {
     /**
      * Die Vorhersagedaten eines Tages parsen und im Repository abspeichern.
      *
-     * @param context
-     * @param dayString
-     * @param jsonObject
+     * @param dayString     Zu behandelnder Tag
+     * @param jsonObject    zugehörige Wetterdaten
      * @throws JSONException
      */
-    public void parseDayIntoRepository(Context context, String dayString, JSONObject jsonObject) throws JSONException {
+    public void parseDayIntoRepository(String dayString, JSONObject jsonObject) throws JSONException {
         DayForecast dayForecast = new DayForecast();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
@@ -83,7 +76,10 @@ public class ForecastRestImporter extends AsyncTask<Void, Void, String> {
         dayForecast.setAirPressure(jsonObject.getDouble("pc"));
         dayForecast.setWindDirection(jsonObject.getString("wd_txt"));
         dayForecast.setWindSpeed(jsonObject.getDouble("ws"));
-        dayForecast.setIcon(context.getResources().getIdentifier("d" + jsonObject.getString("w"), "drawable", context.getPackageName()));
+        String fileName = "d" + jsonObject.getString("w");
+        //Log.d(LOG_TAG, "parseDayIntoRepository(), IconFileName: " + fileName);
+        //dayForecast.setIcon(context.getResources().getIdentifier(fileName, "drawable", context.getPackageName()));
+        dayForecast.setIconFileName(fileName);
         WeatherRepository.getInstance().addForecast(dayForecast);
     }
 }

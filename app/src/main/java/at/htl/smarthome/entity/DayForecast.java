@@ -15,14 +15,14 @@ public class DayForecast {
     private String status;
     private String windDirection;
     private double windSpeed;
-    private int icon;
+    private String iconFileName;
 
-    public int getIcon() {
-        return icon;
+    public String getIconFileName() {
+        return iconFileName;
     }
 
-    public void setIcon(int icon) {
-        this.icon = icon;
+    public void setIconFileName(String iconFileName) {
+        this.iconFileName = iconFileName;
     }
 
     public int getMinTemperature() {

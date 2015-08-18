@@ -1,5 +1,8 @@
 package at.htl.smarthome;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -7,11 +10,21 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.apache.http.conn.util.InetAddressUtils;
+
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
+import at.htl.smarthome.api.HomematicRpcHandler;
+import at.htl.smarthome.entity.Settings;
 import at.htl.smarthome.view.ControlFragment;
 import at.htl.smarthome.view.MainFragment;
 
@@ -19,8 +32,7 @@ import at.htl.smarthome.view.MainFragment;
 public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
-
-    // tets
+    MainFragment mainFragment;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -51,6 +63,14 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        String ipHomematic = Settings.getInstance(this).getHomematicIp();
+        String url = "http://" + ipHomematic + ":2001";
+        try {
+            HomematicRpcHandler getEventsTask = new HomematicRpcHandler();
+            getEventsTask.initXmlRpcClient(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -63,18 +83,64 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.menu_action_refresh:
+                mainFragment.refreshData();
+                return true;
+            case R.id.menu_quit:
+                finish();
+                return true;
+            case R.id.menu_action_settings:
+                Intent intentSettings = new Intent(this, SettingsActivity.class);
+                startActivity(intentSettings);
+                return true;
+            case R.id.menu_action_ip:
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                alertDialogBuilder.setTitle("IP-Adresse des Handys");
+                alertDialogBuilder
+                        .setMessage(getLocalIpAddress())
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+                AlertDialog ipDialog = alertDialogBuilder.create();
+                ipDialog.show();
+                return true;
         }
-
-        return super.onOptionsItemSelected(item);
+        return false;
     }
+
+
+    /**
+     * Get IP address from first non-localhost interface
+     *
+     * @return address or empty string
+     */
+    public String getLocalIpAddress() {
+        try {
+            List<NetworkInterface> interfaces = Collections
+                    .list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface networkInterface : interfaces) {
+                List<InetAddress> addresses = Collections.list(networkInterface
+                        .getInetAddresses());
+                for (InetAddress address : addresses) {
+                    if (!address.isLoopbackAddress()) {
+                        String addressAsString = address.getHostAddress().toUpperCase(Locale.GERMAN);
+                        boolean isIPv4 = InetAddressUtils.isIPv4Address(addressAsString);
+                        if (isIPv4) {
+                            return addressAsString;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Log.e(LOG_TAG, "getLocalIpAddress() Exception: " + ex.toString());
+        }
+        return "";
+    }
+
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -86,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
-        MainFragment mainFragment;
         ControlFragment controlFragment;
 
         public SectionsPagerAdapter(FragmentManager fm) {

@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:columnCount="6"
-        android:rowCount="5">
+        android:rowCount="6">
 
         <TextView
             android:id="@+id/tv_date_time"
@@ -21,18 +21,9 @@
             android:layout_row="0"
             android:gravity="center"
             android:padding="5dp"
-            android:text="Samstag 8. August 2015 10:34"
+            android:text="@string/txt_date_time_default"
             android:textAppearance="?android:textAppearanceLarge" />
 
-
-        <Button
-            android:id="@+id/button_refresh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_column="4"
-            android:layout_columnSpan="2"
-            android:layout_row="0"
-            android:text="@string/bt_txt_refresh" />
 
         <ImageView
             android:id="@+id/iv_actual"
@@ -112,7 +103,7 @@
             android:src="@drawable/arrow" />
 
         <TextView
-            android:id="@+id/tv_wind"
+            android:id="@+id/tv_wind_speed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="1"
@@ -124,6 +115,7 @@
             android:textAppearance="?android:textAppearanceLarge" />
 
         <TextView
+            android:id="@+id/tv_wind_direction"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_column="2"
@@ -131,7 +123,7 @@
             android:layout_row="3"
             android:gravity="center"
             android:padding="5dp"
-            android:text="Regenverlauf"
+            android:text="270°"
             android:textAppearance="?android:textAppearanceLarge" />
 
         <TextView
@@ -199,9 +191,80 @@
             android:layout_row="4"
             android:gravity="center"
             android:padding="5dp"
-            android:text="Luftdruck Verlauf"
+            android:text=""
             android:textAppearance="?android:textAppearanceLarge" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="3"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_row="4"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="Regen:"
+            android:textAppearance="?android:textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/tv_rain_hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="4"
+            android:layout_gravity="center_vertical|right"
+            android:layout_row="4"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="0 l/m²"
+            android:textAppearance="?android:textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/tv_rain_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="5"
+            android:layout_gravity="left|center_vertical"
+            android:layout_row="4"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="0 l/m²"
+            android:textAppearance="?android:textAppearanceLarge" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="3"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_row="5"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="Sonne:"
+            android:textAppearance="?android:textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/tv_brightness"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="4"
+            android:layout_gravity="center|right"
+            android:layout_row="5"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="20 %"
+            android:textAppearance="?android:textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/tv_sunshine_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="5"
+            android:layout_gravity="left|center_vertical"
+            android:layout_row="5"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="40 min"
+            android:textAppearance="?android:textAppearanceLarge" />
 
     </GridLayout>
 
