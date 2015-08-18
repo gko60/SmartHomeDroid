@@ -1,6 +1,7 @@
 package at.htl.smarthome.view;
 
 import android.app.Activity;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -41,6 +42,7 @@ public class MainFragment extends Fragment implements Observer {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static String[] weekDayNames = {"Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"};
+    Typeface roboto;
     View fragmentView;
     TextView tvDateTime;
     ImageView ivActual;
@@ -120,6 +122,7 @@ public class MainFragment extends Fragment implements Observer {
     private TextView getTvDateTime() {
         if (tvDateTime == null) {
             tvDateTime = (TextView) fragmentView.findViewById(R.id.tv_date_time);
+            tvDateTime.setTypeface(roboto);
         }
         return tvDateTime;
     }
@@ -322,6 +325,8 @@ public class MainFragment extends Fragment implements Observer {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
+        Typeface roboto = Typeface.createFromAsset(getActivity().getAssets(),
+                "font/Roboto-Regular.ttf"); //use this.getAssets if you are calling from an Activity
         return fragmentView;
     }
 
