@@ -20,4 +20,20 @@
     <string name="tv_temperature_out">29,7°</string>
     <string name="bt_txt_refresh">Refresh</string>
     <string name="txt_date_time_default">Samstag 8. August 2015 10:34</string>
+
+    <string name="tagRainToday">tag_rainToday</string>
+    <string name="tagtemperatureOut">tag_temperatureOut</string>
+    <string name="tagAirPressure">tag_airPressure</string>
+    <string name="tagHmTemperatureOut">tag_hmTemperatureOut</string>
+    <string name="tagHumidityOut">tag_humidityOut</string>
+    <string name="tagRainCounterAll">tag_rainCounterAll</string>
+    <string name="tagWindSpeed">tag_windSpeed</string>
+    <string name="tagWindDirection">tag_windDirection</string>
+    <string name="tagBrightness">tag_brightness</string>
+    <string name="tagSunshineDuration">tag_sunshineDuration</string>
+    <string name="tagTemperatureLivingRoom">tag_temperatureLivingRoom</string>
+    <string name="tagHumidityLivingRoom">tag_humidityLivingRoom</string>
+    <string name="tagTemperatureCellar">tag_temperatureCellar</string>
+    <string name="tagHumidityCellar">tag_humidityCellar</string>
+
 </resources>

@@ -23,6 +23,7 @@ import at.htl.smarthome.R;
 import at.htl.smarthome.async.CurrentWeatherParser;
 import at.htl.smarthome.async.ForecastRestImporter;
 import at.htl.smarthome.entity.DayForecast;
+import at.htl.smarthome.entity.Sensor;
 import at.htl.smarthome.repository.WeatherRepository;
 
 
@@ -46,9 +47,6 @@ public class MainFragment extends Fragment implements Observer {
     View fragmentView;
     TextView tvDateTime;
     ImageView ivActual;
-    TextView tvTemperatureOut;
-    TextView tvHumidyOut;
-    TextView tvAirPressure;
     TextView tvDayOfWeekToday;
     ImageView ivToday;
     TextView tvTodayMinTemperature;
@@ -61,16 +59,6 @@ public class MainFragment extends Fragment implements Observer {
     ImageView ivDayAfterTomorrow;
     TextView tvDayAfterTomorrowMinTemperature;
     TextView tvDayAfterTomorrowMaxTemperature;
-    TextView tvTemperatureLivingRoom;
-    TextView tvHumidityLivingRoom;
-    TextView tvTemperatureCellar;
-    TextView tvHumidityCellar;
-    TextView tvWindSpeed;
-    TextView tvWindDirection;
-    TextView tvRainHour;
-    TextView tvRainDay;
-    TextView tvBrightness;
-    TextView tvSunshineDuration;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -132,27 +120,6 @@ public class MainFragment extends Fragment implements Observer {
             ivActual = (ImageView) fragmentView.findViewById(R.id.iv_actual);
         }
         return ivActual;
-    }
-
-    private TextView getTvTemperatureOut() {
-        if (tvTemperatureOut == null) {
-            tvTemperatureOut = (TextView) fragmentView.findViewById(R.id.tv_temperature_out);
-        }
-        return tvTemperatureOut;
-    }
-
-    private TextView getTvHumidityOut() {
-        if (tvHumidyOut == null) {
-            tvHumidyOut = (TextView) fragmentView.findViewById(R.id.tv_humidity_out);
-        }
-        return tvHumidyOut;
-    }
-
-    private TextView getTvAirPressure() {
-        if (tvAirPressure == null) {
-            tvAirPressure = (TextView) fragmentView.findViewById(R.id.tv_air_pressure);
-        }
-        return tvAirPressure;
     }
 
     private TextView getTvDayOfWeekToday() {
@@ -239,75 +206,6 @@ public class MainFragment extends Fragment implements Observer {
         return tvDayAfterTomorrowMaxTemperature;
     }
 
-    private TextView getTvTemperatureLivingRoom() {
-        if (tvTemperatureLivingRoom == null) {
-            tvTemperatureLivingRoom = (TextView) fragmentView.findViewById(R.id.tv_temperature_living_room);
-        }
-        return tvTemperatureLivingRoom;
-    }
-
-    private TextView getTvHumidityLivingRoom() {
-        if (tvHumidityLivingRoom == null) {
-            tvHumidityLivingRoom = (TextView) fragmentView.findViewById(R.id.tv_humidity_living_room);
-        }
-        return tvHumidityLivingRoom;
-    }
-
-    private TextView getTvTemperatureCellar() {
-        if (tvTemperatureCellar == null) {
-            tvTemperatureCellar = (TextView) fragmentView.findViewById(R.id.tv_temperature_cellar);
-        }
-        return tvTemperatureCellar;
-    }
-
-    private TextView getTvHumidityCellar() {
-        if (tvHumidityCellar == null) {
-            tvHumidityCellar = (TextView) fragmentView.findViewById(R.id.tv_humidity_cellar);
-        }
-        return tvHumidityCellar;
-    }
-
-    private TextView getTvWindSpeed() {
-        if (tvWindSpeed == null) {
-            tvWindSpeed = (TextView) fragmentView.findViewById(R.id.tv_wind_speed);
-        }
-        return tvWindSpeed;
-    }
-
-    private TextView getTvWindDirection() {
-        if (tvWindDirection == null) {
-            tvWindDirection = (TextView) fragmentView.findViewById(R.id.tv_wind_direction);
-        }
-        return tvWindDirection;
-    }
-
-    private TextView getTvRainHour() {
-        if (tvRainHour == null) {
-            tvRainHour = (TextView) fragmentView.findViewById(R.id.tv_rain_hour);
-        }
-        return tvRainHour;
-    }
-
-    private TextView getTvRainDay() {
-        if (tvRainDay == null) {
-            tvRainDay = (TextView) fragmentView.findViewById(R.id.tv_rain_day);
-        }
-        return tvRainDay;
-    }
-
-    private TextView getTvBrightness() {
-        if (tvBrightness == null) {
-            tvBrightness = (TextView) fragmentView.findViewById(R.id.tv_brightness);
-        }
-        return tvBrightness;
-    }
-
-    private TextView getTvSunshineDuration() {
-        if (tvSunshineDuration == null) {
-            tvSunshineDuration = (TextView) fragmentView.findViewById(R.id.tv_sunshine_duration);
-        }
-        return tvSunshineDuration;
-    }
 
     /*----------------------------------------------------------------------------------*/
     @Override
@@ -325,8 +223,6 @@ public class MainFragment extends Fragment implements Observer {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
-        Typeface roboto = Typeface.createFromAsset(getActivity().getAssets(),
-                "font/Roboto-Regular.ttf"); //use this.getAssets if you are calling from an Activity
         return fragmentView;
     }
 
@@ -379,31 +275,22 @@ public class MainFragment extends Fragment implements Observer {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
         String dateTimeString = sdf.format(now);
         getTvDateTime().setText(getDayName(now) + ", " + dateTimeString);
-        String temperatureOutString = getDoubleString(weatherRepository.getTemperatureOut(), 1) + "/" +
-                getDoubleString(weatherRepository.getHmTemperatureOut(), 1) + " °C";
-        getTvTemperatureOut().setText(temperatureOutString);
+        for (Sensor sensor : WeatherRepository.getInstance().getSensors()) {
+            TextView textView = (TextView) fragmentView.findViewWithTag(sensor.getViewTag());
+            if (textView != null) {
+                textView.setText(getDoubleString(sensor.getValue(), sensor.getDecimalPlaces()) + sensor.getUnit());
+            }
+        }
         int imgRessource = getActivity().getResources().getIdentifier(WeatherRepository.getInstance().getActualWeatherIconFileName(), "drawable", getActivity().getPackageName());
         getIvActual().setImageResource(imgRessource);
-        getTvHumidityOut().setText(getDoubleString(WeatherRepository.getInstance().getHumidityOut(), 1) + "%");
-        getTvAirPressure().setText(getDoubleString(WeatherRepository.getInstance().getAirPressure(), 1) + " hPa");
-        getTvTemperatureLivingRoom().setText(getDoubleString(WeatherRepository.getInstance().getTemperatureLivingRoom(), 1) + "°C");
-        getTvHumidityLivingRoom().setText(getDoubleString(WeatherRepository.getInstance().getHumidityLivingRoom(), 1) + "%");
-        getTvTemperatureCellar().setText(getDoubleString(WeatherRepository.getInstance().getTemperatureCellar(), 1) + "°C");
-        getTvHumidityCellar().setText(getDoubleString(WeatherRepository.getInstance().getHumidityCellar(), 1) + "%");
-        getTvWindSpeed().setText(getDoubleString(WeatherRepository.getInstance().getWindSpeed(), 1) + "km/h");
-        getTvWindDirection().setText(getDoubleString(WeatherRepository.getInstance().getWindDirection(), 1) + "°");
-        getTvRainDay().setText(getDoubleString(WeatherRepository.getInstance().getRainCounter(), 1) + "l/qm");
-        //! Regenberechnung
-        getTvSunshineDuration().setText(getDoubleString(WeatherRepository.getInstance().getSunshineDuration(), 1) + "min");
-        //! Berechnung Sonnenstunden
         if (WeatherRepository.getInstance().getDayForecasts().size() > 0) {
             DayForecast dayForecast = WeatherRepository.getInstance().getDayForecasts().get(0);
             Date date = new Date();
             getTvDayOfWeekToday().setText(getDayName(date));
             imgRessource = getActivity().getResources().getIdentifier(dayForecast.getIconFileName(), "drawable", getActivity().getPackageName());
             getIvToday().setImageResource(imgRessource);
-            getTvTodayMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °C");
-            getTvTodayMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °C");
+            getTvTodayMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
+            getTvTodayMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
         }
         if (WeatherRepository.getInstance().getDayForecasts().size() > 1) {
             Calendar calendar = Calendar.getInstance();
@@ -413,8 +300,8 @@ public class MainFragment extends Fragment implements Observer {
             DayForecast dayForecast = WeatherRepository.getInstance().getDayForecasts().get(1);
             imgRessource = getActivity().getResources().getIdentifier(dayForecast.getIconFileName(), "drawable", getActivity().getPackageName());
             getIvTomorrow().setImageResource(imgRessource);
-            getTvTomorrowMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °C");
-            getTvTomorrowMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °C");
+            getTvTomorrowMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
+            getTvTomorrowMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
         }
         if (WeatherRepository.getInstance().getDayForecasts().size() > 2) {
             Calendar calendar = Calendar.getInstance();
@@ -424,8 +311,8 @@ public class MainFragment extends Fragment implements Observer {
             DayForecast dayForecast = WeatherRepository.getInstance().getDayForecasts().get(2);
             imgRessource = getActivity().getResources().getIdentifier(dayForecast.getIconFileName(), "drawable", getActivity().getPackageName());
             getIvDayAfterTomorrow().setImageResource(imgRessource);
-            getTvDayAfterTomorrowMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °C");
-            getTvDayAfterTomorrowMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °C");
+            getTvDayAfterTomorrowMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
+            getTvDayAfterTomorrowMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
         }
 
     }

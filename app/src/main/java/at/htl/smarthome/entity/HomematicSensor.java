@@ -5,8 +5,8 @@ public class HomematicSensor extends Sensor {
     private String address;
     private String valueKey;
 
-    public HomematicSensor(String name, String unit, String address, String valueKey) {
-        super(name, unit);
+    public HomematicSensor(int id, String viewTag, int decimalPlaces, String unit, String address, String valueKey) {
+        super(id, viewTag, decimalPlaces, unit);
         this.address = address;
         this.valueKey = valueKey;
     }

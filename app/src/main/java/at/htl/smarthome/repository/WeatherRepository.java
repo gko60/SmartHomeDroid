@@ -10,7 +10,9 @@ import java.util.Observable;
 
 import at.htl.smarthome.entity.DayForecast;
 import at.htl.smarthome.entity.HomematicSensor;
+import at.htl.smarthome.entity.RainToday;
 import at.htl.smarthome.entity.Sensor;
+import at.htl.smarthome.entity.SunshineDuration;
 
 
 /**
@@ -27,7 +29,8 @@ public class WeatherRepository extends Observable {
     private Sensor airPressure;
     private HomematicSensor hmTemperatureOut;
     private HomematicSensor humidityOut;
-    private HomematicSensor rainCounter;
+    private HomematicSensor rainCounterAll;
+    private RainToday rainToday;
     private HomematicSensor windSpeed;
     private HomematicSensor windDirection;
     private HomematicSensor brightness;
@@ -39,27 +42,44 @@ public class WeatherRepository extends Observable {
 
     private List<DayForecast> dayForecasts;
     private Map<String, HomematicSensor> homematicSensors;
+    private List<Sensor> sensors;
 
 
     private WeatherRepository() {
-        temperatureOut = new Sensor("Aussentemperatur", "°");
-        airPressure = new Sensor("Luftdruck", "hPa");
-        hmTemperatureOut = new HomematicSensor("HmAussentemperaur", "°C", "LEQ0214590:1", "TEMPERATURE");
-        humidityOut = new HomematicSensor("Luftfeuchte", "%", "LEQ0214590:1", "HUMIDITY");
-        rainCounter = new HomematicSensor("Regenmenge", "mm", "LEQ0214590:1", "RAIN_COUNTER");
-        windSpeed = new HomematicSensor("Windgeschwindigkeit", "km/h", "LEQ0214590:1", "WIND_SPEED");
-        windDirection = new HomematicSensor("Windrichtung", "°", "LEQ0214590:1", "WIND_DIRECTION");
-        brightness = new HomematicSensor("Helligkeit", "%", "LEQ0214590:1", "BRIGHTNESS");
-        sunshineDuration = new HomematicSensor("Sonnenscheindauer", "min", "LEQ0214590:1", "SUNSHINEDURATION");
-        temperatureLivingRoom = new HomematicSensor("Innentemperatur", "°C", "KEQ0850330:1", "TEMPERATURE");
-        humidityLivingRoom = new HomematicSensor("Luftfeuchte Wohnzimmer", "°C", "KEQ0850330:1", "HUMIDITY");
-        temperatureCellar = new HomematicSensor("Kellertemperatur", "°C", "LEQ0228587:1", "TEMPERATURE");
-        humidityCellar = new HomematicSensor("Luftfeuchte Keller", "°C", "LEQ0228587:1", "HUMIDITY");
+        sensors = new ArrayList<>();
+        temperatureOut = new Sensor(1, "tag_temperatureOut", 1, "°");
+        airPressure = new Sensor(2, "tag_airPressure", 1, " hPa");
+        hmTemperatureOut = new HomematicSensor(3, "tag_hmTemperatureOut", 1, "°", "LEQ0214590:1", "TEMPERATURE");
+        humidityOut = new HomematicSensor(4, "tag_humidityOut", 0, "%", "LEQ0214590:1", "HUMIDITY");
+        rainCounterAll = new HomematicSensor(5, "tag_rainCounterAll", 1, " mm", "LEQ0214590:1", "RAIN_COUNTER");
+        rainToday = new RainToday(6, "tag_rainToday", 1, " mm");
+        windSpeed = new HomematicSensor(7, "tag_windSpeed", 0, " km/h", "LEQ0214590:1", "WIND_SPEED");
+        windDirection = new HomematicSensor(8, "tag_windDirection", 0, "°", "LEQ0214590:1", "WIND_DIRECTION");
+        brightness = new HomematicSensor(9, "tag_brightness", 0, "%", "LEQ0214590:1", "BRIGHTNESS");
+        sunshineDuration = new SunshineDuration(10, "tag_sunshineDuration", 1, " h", "LEQ0214590:1", "SUNSHINEDURATION");
+        temperatureLivingRoom = new HomematicSensor(11, "tag_temperatureLivingRoom", 1, "°", "KEQ0850330:1", "TEMPERATURE");
+        humidityLivingRoom = new HomematicSensor(12, "tag_humidityLivingRoom", 0, "%", "KEQ0850330:1", "HUMIDITY");
+        temperatureCellar = new HomematicSensor(13, "tag_temperatureCellar", 1, "°", "LEQ0228587:1", "TEMPERATURE");
+        humidityCellar = new HomematicSensor(14, "tag_humidityCellar", 0, "%", "LEQ0228587:1", "HUMIDITY");
+        sensors.add(temperatureOut);
+        sensors.add(airPressure);
+        sensors.add(hmTemperatureOut);
+        sensors.add(humidityOut);
+        sensors.add(rainCounterAll);
+        sensors.add(rainToday);
+        sensors.add(windSpeed);
+        sensors.add(windDirection);
+        sensors.add(brightness);
+        sensors.add(sunshineDuration);
+        sensors.add(temperatureLivingRoom);
+        sensors.add(humidityLivingRoom);
+        sensors.add(temperatureCellar);
+        sensors.add(humidityCellar);
         dayForecasts = new ArrayList<>();
         homematicSensors = new HashMap<>();
         homematicSensors.put(hmTemperatureOut.getMapKey(), hmTemperatureOut);
         homematicSensors.put(humidityOut.getMapKey(), humidityOut);
-        homematicSensors.put(rainCounter.getMapKey(), rainCounter);
+        homematicSensors.put(rainCounterAll.getMapKey(), rainCounterAll);
         homematicSensors.put(windSpeed.getMapKey(), windSpeed);
         homematicSensors.put(windDirection.getMapKey(), windDirection);
         homematicSensors.put(brightness.getMapKey(), brightness);
@@ -74,6 +94,10 @@ public class WeatherRepository extends Observable {
         if (repository == null)
             repository = new WeatherRepository();
         return repository;
+    }
+
+    public List<Sensor> getSensors() {
+        return sensors;
     }
 
     public List<DayForecast> getDayForecasts() {
@@ -107,56 +131,6 @@ public class WeatherRepository extends Observable {
         setChanged();
     }
 
-    public double getTemperatureOut() {
-        return temperatureOut.getValue();
-    }
-
-    public double getHmTemperatureOut() {
-        return hmTemperatureOut.getValue();
-    }
-
-    public double getTemperatureLivingRoom() {
-        return temperatureLivingRoom.getValue();
-    }
-
-    public double getHumidityLivingRoom() {
-        return humidityLivingRoom.getValue();
-    }
-    public double getAirPressure() {
-        return airPressure.getValue();
-    }
-
-    public double getHumidityOut() {
-        return humidityOut.getValue();
-    }
-
-    public double getRainCounter() {
-        return rainCounter.getValue();
-    }
-
-    public double getWindSpeed() {
-        return windSpeed.getValue();
-    }
-
-    public double getWindDirection() {
-        return windDirection.getValue();
-    }
-
-    public double getBrightness() {
-        return brightness.getValue();
-    }
-
-    public double getSunshineDuration() {
-        return sunshineDuration.getValue();
-    }
-
-    public double getTemperatureCellar() {
-        return temperatureCellar.getValue();
-    }
-
-    public double getHumidityCellar() {
-        return humidityCellar.getValue();
-    }
 
     public void addHomematicSensorValue(String address, String valueKey, String stringValue) {
         Log.d(LOG_TAG, "addHomematicSensorValue: " + address + "," + valueKey + ":" + stringValue);
@@ -168,9 +142,6 @@ public class WeatherRepository extends Observable {
             Log.d(LOG_TAG, "addHomematicSensorValue() Value in Messwerte eingefuegt");
         }
     }
-
-
-
 
     /**
      * UI soll nicht bei jeder Änderung verständigt werden, falls mehrere

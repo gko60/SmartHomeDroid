@@ -14,15 +14,19 @@ import java.util.List;
 public class Sensor {
     private static int DAY_BUFFER_LENGTH = 7;  // eine Woche wird im Hauptspeicher gepuffert
     double[][] values;
-    private String name;        // Name des Sensors
+    int id;
+    private String viewTag;        // Name des Sensors
+    private int decimalPlaces;
     private String unit;        // Einheit
     private DateTime actDate;   // Aktuelles Datum
     private int actQuarterOfAnHour; // Aktuelle Viertelstunde
     private List<Double> actQuarterOfAnHourValues;  // aktuelle Werte innerhalb der Viertelstunde
     // ==> werden dann gemittelt
 
-    public Sensor(String name, String unit) {
-        this.name = name;
+    public Sensor(int id, String viewTag, int decimalPlaces, String unit) {
+        this.id = id;
+        this.viewTag = viewTag;
+        this.decimalPlaces = decimalPlaces;
         this.unit = unit;
         actDate = new DateTime();
         actQuarterOfAnHour = getTimeSlotIndex(actDate);
@@ -33,20 +37,32 @@ public class Sensor {
     /**
      * Aus der aktuellen Zeit wird der Index der Viertelstunde ermittelt
      *
-     * @param time
-     * @return
+     * @param time -
+     * @return Viertelstundenindex
      */
     public static int getTimeSlotIndex(DateTime time) {
         return time.getMinuteOfDay() / 15;
+    }
+
+    public String getViewTag() {
+        return viewTag;
+    }
+
+    public int getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public String getUnit() {
+        return unit;
     }
 
     /**
      * Füllt das Wertearray am aktuellen Tag im Bereich from - to (exkl)
      * mit dem Wert
      *
-     * @param value
-     * @param from
-     * @param to
+     * @param value einzufügender Messwert
+     * @param from von-Viertelstunde
+     * @param to  bis-Viertelstunde (exklusive)
      */
     private void fillValues(double value, int from, int to) {
         for (int i = from + 1; i < to; i++) {
@@ -55,6 +71,11 @@ public class Sensor {
 
     }
 
+    /**
+     * Messwert zu Sensor hinzufügen
+     *
+     * @param newValue neuer Messwert
+     */
     public void addValue(double newValue) {
         DateTime dateTime = new DateTime();
         double lastValue = getValue();
@@ -70,6 +91,8 @@ public class Sensor {
             }
             // neuen Tag anlegen
             values[0] = new double[24 * 4];
+            // getDayStartValue
+            lastValue = getDayStartValue(lastValue);
             // bis zur aktuellen Viertelstunde füllen
             fillValues(lastValue, 0, quarterOfAnHour);
             values[0][quarterOfAnHour] = newValue;
@@ -98,9 +121,22 @@ public class Sensor {
     }
 
     /**
+     * Mit welchem Wert startet ein Sensor in einen neuen Tag.
+     * Reine aktuelle Messwerte behalten den letzten Sensorwertb bei. Kummulierte Werte
+     * (Sonnenscheindauer, Regenmenge, ...) werden auf 0 gesetzt. Wird vom jeweiligen
+     * Sensor bei Bedarf überschrieben
+     *
+     * @param actValue defaultmässig geht es mit dem aktuellen Messwert weiter
+     * @return Messwert, mit dem der Tag begonnen wird
+     */
+    protected double getDayStartValue(double actValue) {
+        return actValue;
+    }
+
+    /**
      * Messwert der aktuellen Viertelstunde zurückliefern
      *
-     * @return
+     * @return aktuellen Messwert liefern
      */
     public double getValue() {
         return getValue(actQuarterOfAnHour);
@@ -109,8 +145,8 @@ public class Sensor {
     /**
      * Liefert den Messwert für die gegebene Viertelstunde
      *
-     * @param index
-     * @return
+     * @param index  Viertelstundenindex
+     * @return Messwert der Viertelstunde
      */
     public double getValue(int index) {
         return values[0][index];
