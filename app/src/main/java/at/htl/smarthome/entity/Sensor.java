@@ -44,6 +44,10 @@ public class Sensor {
         return time.getMinuteOfDay() / 15;
     }
 
+    public int getId() {
+        return id;
+    }
+
     public String getViewTag() {
         return viewTag;
     }
