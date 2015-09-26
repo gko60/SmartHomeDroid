@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -281,6 +282,7 @@ public class MainFragment extends Fragment implements Observer {
                 textView.setText(getDoubleString(sensor.getValue(), sensor.getDecimalPlaces()) + sensor.getUnit());
             }
         }
+        Log.d(LOG_TAG, "update() + Imagefilename: " + WeatherRepository.getInstance().getActualWeatherIconFileName());
         int imgRessource = getActivity().getResources().getIdentifier(WeatherRepository.getInstance().getActualWeatherIconFileName(), "drawable", getActivity().getPackageName());
         getIvActual().setImageResource(imgRessource);
         if (WeatherRepository.getInstance().getDayForecasts().size() > 0) {

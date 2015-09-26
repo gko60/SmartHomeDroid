@@ -5,6 +5,8 @@ import org.joda.time.DateTime;
 import java.util.LinkedList;
 import java.util.List;
 
+import at.htl.smarthome.repository.WeatherRepository;
+
 /**
  * Verwaltet die Messwerte eines Sensors. Quelle kann die Homematic oder auch Werte aus dem Netz
  * sein.
@@ -12,6 +14,8 @@ import java.util.List;
  * sich aus dem Durchschnitt der, in der letzten Viertelstunde eingelangten Messwerte.
  */
 public class Sensor {
+    private static final String LOG_TAG = Sensor.class.getSimpleName();
+
     private static int DAY_BUFFER_LENGTH = 7;  // eine Woche wird im Hauptspeicher gepuffert
     double[][] values;
     int id;
@@ -86,6 +90,7 @@ public class Sensor {
         int quarterOfAnHour = getTimeSlotIndex(dateTime);
         if (dateTime.toDate().after(actDate.toDate())) {  // Tageswechsel
             // Werte des letzten Tages bis Mitternacht auffüllen
+            WeatherRepository.getInstance().writeLineToFile("Tageswechsel");
             fillValues(lastValue, actQuarterOfAnHour, 24 * 4);
             // ältesten Tag persisitieren
             persistLastDay();
@@ -120,6 +125,7 @@ public class Sensor {
                 actQuarterOfAnHourValues.clear();
                 actQuarterOfAnHourValues.add(newValue);
                 actQuarterOfAnHour = quarterOfAnHour;
+                WeatherRepository.getInstance().persistQuarterOfAnHour(this, quarterOfAnHour, newValue);
             }
         }
     }
@@ -161,4 +167,6 @@ public class Sensor {
      */
     public void persistLastDay() {
     }
+
+
 }
