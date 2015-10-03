@@ -2,9 +2,13 @@ package at.htl.smarthome.entity;
 
 import org.joda.time.DateTime;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import at.htl.smarthome.api.CsvFileManager;
 import at.htl.smarthome.repository.WeatherRepository;
 
 /**
@@ -16,13 +20,14 @@ import at.htl.smarthome.repository.WeatherRepository;
 public class Sensor {
     private static final String LOG_TAG = Sensor.class.getSimpleName();
 
-    private static int DAY_BUFFER_LENGTH = 7;  // eine Woche wird im Hauptspeicher gepuffert
+    private static int DAY_BUFFER_LENGTH = 31;  // ein Monat wird im Hauptspeicher gepuffert
     double[][] values;
     int id;
     private String viewTag;        // Name des Sensors
     private int decimalPlaces;
     private String unit;        // Einheit
-    private DateTime actDate;   // Aktuelles Datum
+    private Date actDate;   // Aktuelles Datum
+    private int actDateIndex;
     private int actQuarterOfAnHour; // Aktuelle Viertelstunde
     private List<Double> actQuarterOfAnHourValues;  // aktuelle Werte innerhalb der Viertelstunde
     // ==> werden dann gemittelt
@@ -32,8 +37,10 @@ public class Sensor {
         this.viewTag = viewTag;
         this.decimalPlaces = decimalPlaces;
         this.unit = unit;
-        actDate = new DateTime();
-        actQuarterOfAnHour = getTimeSlotIndex(actDate);
+        DateTime dateTime = new DateTime();
+        actDate = dateTime.toDate();
+        actDateIndex = getDayIndex(actDate);
+        actQuarterOfAnHour = getTimeSlotIndex(dateTime);
         actQuarterOfAnHourValues = new LinkedList<>();
         values = new double[DAY_BUFFER_LENGTH][24 * 4];
     }
@@ -46,6 +53,12 @@ public class Sensor {
      */
     public static int getTimeSlotIndex(DateTime time) {
         return time.getMinuteOfDay() / 15;
+    }
+
+    public static int getDayIndex(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.DAY_OF_MONTH) - 1;
     }
 
     public int getId() {
@@ -72,9 +85,9 @@ public class Sensor {
      * @param from von-Viertelstunde
      * @param to  bis-Viertelstunde (exklusive)
      */
-    private void fillValues(double value, int from, int to) {
+    private void fillValues(int dayIndex, double value, int from, int to) {
         for (int i = from + 1; i < to; i++) {
-            values[0][i] = value;
+            values[dayIndex][i] = value;
         }
 
     }
@@ -85,42 +98,41 @@ public class Sensor {
      * @param newValue neuer Messwert
      */
     public void addValue(double newValue) {
-        DateTime dateTime = new DateTime();
+        DateTime newDateTime = new DateTime();
+        Date newDate = newDateTime.toDate();
         double lastValue = getValue();
-        int quarterOfAnHour = getTimeSlotIndex(dateTime);
-        if (dateTime.toDate().after(actDate.toDate())) {  // Tageswechsel
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String lastDateString = sdf.format(actDate);
+        String newDateString = sdf.format(newDate);
+        int quarterOfAnHour = getTimeSlotIndex(newDateTime);
+        if (!lastDateString.equals(newDateString)) {  // Tageswechsel
             // Werte des letzten Tages bis Mitternacht auffüllen
-            WeatherRepository.getInstance().writeLineToFile("Tageswechsel");
-            fillValues(lastValue, actQuarterOfAnHour, 24 * 4);
-            // ältesten Tag persisitieren
-            persistLastDay();
-            // Tage verschieben
-            for (int i = DAY_BUFFER_LENGTH - 1; i > 0; i--) {
-                values[i] = values[i - 1];
-            }
-            // neuen Tag anlegen
-            values[0] = new double[24 * 4];
-            // getDayStartValue
-            lastValue = getDayStartValue(lastValue);
+            CsvFileManager.getInstance().traceLineToFile("Tageswechsel von: " + lastDateString + " auf: " + newDateString);
+            fillValues(actDateIndex, lastValue, actQuarterOfAnHour, 24 * 4);
+            // letzten Tag persisitieren
+            CsvFileManager.getInstance().persistYesterdaysMeasurements(this, lastDateString, values[actDateIndex]);
+            actDateIndex = getDayIndex(newDate);
+            lastValue = getDayStartValue(lastValue);  // bis zur aktuellen Viertelstunde füllen
             // bis zur aktuellen Viertelstunde füllen
-            fillValues(lastValue, 0, quarterOfAnHour);
-            values[0][quarterOfAnHour] = newValue;
+            fillValues(actDateIndex, lastValue, 0, quarterOfAnHour);
             actQuarterOfAnHourValues.clear();
             actQuarterOfAnHourValues.add(newValue);
             actQuarterOfAnHour = quarterOfAnHour;
-        } else {  // Viertelstunde im aktuellen Tag
+            actDate = newDate;
+        } else {
+            // Viertelstunde im aktuellen Tag
             if (quarterOfAnHour == actQuarterOfAnHour) {  // neuer Wert für aktuelle Viertelstunde
                 actQuarterOfAnHourValues.add(newValue);  // eintragen und Mittelwert neu berechnen
                 double sumOfValues = 0;
                 for (double v : actQuarterOfAnHourValues) {
                     sumOfValues += v;
                 }
-                values[0][actQuarterOfAnHour] = sumOfValues / actQuarterOfAnHourValues.size();
+                values[actDateIndex][actQuarterOfAnHour] = sumOfValues / actQuarterOfAnHourValues.size();
             } else {  // Viertelstunde hat sich geändert
                 // Viertelstundenwerte, die zwischen der letzten Änderung und jetzt liegen
                 // werden mit dem letzten Wert befüllt
                 // neue Mittelwertbildung beginnen
-                fillValues(newValue, actQuarterOfAnHour, quarterOfAnHour);
+                fillValues(actDateIndex, newValue, actQuarterOfAnHour, quarterOfAnHour);
                 values[0][quarterOfAnHour] = newValue;
                 actQuarterOfAnHourValues.clear();
                 actQuarterOfAnHourValues.add(newValue);
@@ -161,12 +173,5 @@ public class Sensor {
     public double getValue(int index) {
         return values[0][index];
     }
-
-    /**
-     * Der letzte Tag wird auf die SD-Karte persistiert.
-     */
-    public void persistLastDay() {
-    }
-
 
 }

@@ -1,20 +1,14 @@
 package at.htl.smarthome.repository;
 
-import android.os.Environment;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 
+import at.htl.smarthome.api.CsvFileManager;
 import at.htl.smarthome.entity.DayForecast;
 import at.htl.smarthome.entity.HomematicSensor;
 import at.htl.smarthome.entity.RainToday;
@@ -29,7 +23,6 @@ import at.htl.smarthome.entity.SunshineDuration;
 public class WeatherRepository extends Observable {
     private static final String LOG_TAG = WeatherRepository.class.getSimpleName();
     private static WeatherRepository repository;
-    File traceFile;
     private String actualWeatherIconFileName;
     private Sensor temperatureOut;
     private Sensor airPressure;
@@ -52,17 +45,8 @@ public class WeatherRepository extends Observable {
 
 
     private WeatherRepository() {
-        File externalStorageDir = Environment.getExternalStorageDirectory();
-        traceFile = new File(externalStorageDir, "smarthome.csv");
-        if (!traceFile.exists()) {
-            try {
-                traceFile.createNewFile();
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "persistQuarterOfAnHour, createNewFile: " + e.getMessage());
-            }
-        }
-        writeLineToFile("Repository angelegt!");
-        writeLineToFile("Zweite Zeile");
+        CsvFileManager.getInstance().traceLineToFile("Repository angelegt!");
+        CsvFileManager.getInstance().traceLineToFile("Zweite Zeile");
 
         sensors = new ArrayList<>();
         temperatureOut = new Sensor(1, "tag_temperatureOut", 1, "°");
@@ -170,23 +154,6 @@ public class WeatherRepository extends Observable {
     }
 
 
-    public void writeLineToFile(String line) {
-        if (traceFile == null) return;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.GERMANY);
-        String dateTime = dateFormat.format(new java.util.Date());
-        line = dateTime + ";" + line + "\n";
-        try {
-            FileOutputStream fOut = new FileOutputStream(traceFile, true);  // append
-            OutputStreamWriter writer = new OutputStreamWriter(fOut);
-            writer.append(line);
-            writer.flush();
-            writer.close();
-            fOut.close();
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "writeLineToFile(), write Sensorvalue: " + e.getMessage());
-        }
-    }
-
 
     /***
      * Schreibt einen Viertelstundenwert auf die SD-Karte
@@ -196,10 +163,9 @@ public class WeatherRepository extends Observable {
      * @param value
      */
     public void persistQuarterOfAnHour(Sensor sensor, int quarter, double value) {
-        if (traceFile == null) return;
         String line = sensor.getViewTag().substring(4);
         line = line + ";" + quarter + ";" + value;
-        writeLineToFile(line);
+        CsvFileManager.getInstance().traceLineToFile(line);
     }
 
 }
