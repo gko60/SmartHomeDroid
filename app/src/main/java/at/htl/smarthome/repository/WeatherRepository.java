@@ -3,6 +3,7 @@ package at.htl.smarthome.repository;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,14 +42,14 @@ public class WeatherRepository extends Observable {
 
     private List<DayForecast> dayForecasts;
     private Map<String, HomematicSensor> homematicSensors;
-    private List<Sensor> sensors;
+    private Map<String, Sensor> sensors;
 
 
     private WeatherRepository() {
         CsvFileManager.getInstance().traceLineToFile("Repository angelegt!");
         CsvFileManager.getInstance().traceLineToFile("Zweite Zeile");
 
-        sensors = new ArrayList<>();
+        sensors = new HashMap<>();
         temperatureOut = new Sensor(1, "tag_temperatureOut", 1, "°");
         airPressure = new Sensor(2, "tag_airPressure", 1, " hPa");
         hmTemperatureOut = new HomematicSensor(3, "tag_hmTemperatureOut", 1, "°", "LEQ0214590:1", "TEMPERATURE");
@@ -63,20 +64,20 @@ public class WeatherRepository extends Observable {
         humidityLivingRoom = new HomematicSensor(12, "tag_humidityLivingRoom", 0, "%", "KEQ0850330:1", "HUMIDITY");
         temperatureCellar = new HomematicSensor(13, "tag_temperatureCellar", 1, "°", "LEQ0228587:1", "TEMPERATURE");
         humidityCellar = new HomematicSensor(14, "tag_humidityCellar", 0, "%", "LEQ0228587:1", "HUMIDITY");
-        sensors.add(temperatureOut);
-        sensors.add(airPressure);
-        sensors.add(hmTemperatureOut);
-        sensors.add(humidityOut);
-        sensors.add(rainCounterAll);
-        sensors.add(rainToday);
-        sensors.add(windSpeed);
-        sensors.add(windDirection);
-        sensors.add(brightness);
-        sensors.add(sunshineDuration);
-        sensors.add(temperatureLivingRoom);
-        sensors.add(humidityLivingRoom);
-        sensors.add(temperatureCellar);
-        sensors.add(humidityCellar);
+        sensors.put("tag_temperatureOut", temperatureOut);
+        sensors.put("tag_airPressure", airPressure);
+        sensors.put("tag_hmTemperatureOut", hmTemperatureOut);
+        sensors.put("tag_humidityOut", humidityOut);
+        sensors.put("tag_rainCounterAll", rainCounterAll);
+        sensors.put("tag_rainToday", rainToday);
+        sensors.put("tag_windSpeed", windSpeed);
+        sensors.put("tag_windDirection", windDirection);
+        sensors.put("tag_brightness", brightness);
+        sensors.put("tag_sunshineDuration", sunshineDuration);
+        sensors.put("tag_temperatureLivingRoom", temperatureLivingRoom);
+        sensors.put("tag_humidityLivingRoom", humidityLivingRoom);
+        sensors.put("tag_temperatureCellar", temperatureCellar);
+        sensors.put("tag_humidityCellar", humidityCellar);
         dayForecasts = new ArrayList<>();
         homematicSensors = new HashMap<>();
         homematicSensors.put(hmTemperatureOut.getMapKey(), hmTemperatureOut);
@@ -90,6 +91,11 @@ public class WeatherRepository extends Observable {
         homematicSensors.put(humidityLivingRoom.getMapKey(), humidityLivingRoom);
         homematicSensors.put(temperatureCellar.getMapKey(), temperatureCellar);
         homematicSensors.put(humidityCellar.getMapKey(), humidityCellar);
+        readMeasurementsFromCsvFile();
+    }
+
+    public static Date getMeYesterday() {
+        return new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
     }
 
     public static synchronized WeatherRepository getInstance() {
@@ -98,8 +104,47 @@ public class WeatherRepository extends Observable {
         return repository;
     }
 
-    public List<Sensor> getSensors() {
-        return sensors;
+    private void readMeasurementsFromCsvFile() {
+        List<String> lines = CsvFileManager.readMeasurementsFromFile();
+        if (lines == null) {
+            Log.e(LOG_TAG, "readMeasurementsFromCsvFile(), lines waren null");
+            return;
+        }
+        for (String line : lines) {
+            String[] elements = line.split(";");
+            if (elements.length < 98) continue;
+            Sensor sensor = sensors.get(elements[1]);
+            if (sensor != null) {
+                String[] dateElements = elements[0].split("-");
+                if (dateElements.length != 3) continue;
+                int dayIndex = Integer.parseInt(dateElements[2]) - 1;
+                boolean isErrorInLine = false;
+                for (int i = 2; i < 98 && !isErrorInLine; i++) {
+                    String valueString = elements[i].replace(',', '.');
+                    try {
+                        sensor.setValue(dayIndex, i - 2, Double.parseDouble(valueString));
+                    } catch (NumberFormatException ex) {
+                        Log.e(LOG_TAG, "initializeSensorsByMeasurements() Sensor: " + sensor.getViewTag() + ", Index: " + (i - 2) + "ValueString: " + valueString);
+                        isErrorInLine = true;
+                    }
+                }
+            }
+        }
+    }
+
+    /***
+     * Messwerte des Vortages werden auf die SD-Karte geschrieben
+     */
+    public void appendMeasurementsToCsvFile(Date day) {
+        CsvFileManager.getInstance().appendYesterdaysMeasurements(getSensors(), day);
+    }
+
+    public Sensor getSensor(String tagName) {
+        return sensors.get(tagName);
+    }
+
+    public Sensor[] getSensors() {
+        return sensors.values().toArray(new Sensor[sensors.values().size()]);
     }
 
     public List<DayForecast> getDayForecasts() {
@@ -158,13 +203,13 @@ public class WeatherRepository extends Observable {
     /***
      * Schreibt einen Viertelstundenwert auf die SD-Karte
      *
-     * @param sensor
-     * @param quarter
-     * @param value
+     * @param sensor    Sensor
+     * @param quarter   Nummer der Viertelstunde (0-95)
+     * @param value     Messwert
      */
     public void persistQuarterOfAnHour(Sensor sensor, int quarter, double value) {
         String line = sensor.getViewTag().substring(4);
-        line = line + ";" + quarter + ";" + value;
+        line = line + ";" + quarter + ";" + CsvFileManager.convertDoubleToGermanString(value);
         CsvFileManager.getInstance().traceLineToFile(line);
     }
 

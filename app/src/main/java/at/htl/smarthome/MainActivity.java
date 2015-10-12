@@ -1,10 +1,15 @@
 package at.htl.smarthome;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.PowerManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -13,6 +18,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 import org.apache.http.conn.util.InetAddressUtils;
 
@@ -32,8 +39,8 @@ import at.htl.smarthome.view.MainFragment;
 public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    BroadcastReceiver motionDetectorReceiver;
     MainFragment mainFragment;
-
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -43,11 +50,29 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     SectionsPagerAdapter mSectionsPagerAdapter;
-
     /**
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+    boolean isMotionDetectedInLastMinute = true;
+    PowerManager.WakeLock wakeLock;
+    private Handler handler;
+    /**
+     * Wird alle 10 Sekunden per post aufgerufen.
+     * Überprüft, ob in der letzten Minute eine
+     * Bewegung auftrat und schaltet, falls nicht
+     * den Bildschirm ab.
+     */
+    private Runnable controlScreenState = new Runnable() {
+        @Override
+        public void run() {
+            if (!isMotionDetectedInLastMinute) {
+                turnOffScreen();
+            }
+            isMotionDetectedInLastMinute = false;
+            handler.postDelayed(controlScreenState, 10000);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +96,21 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        // Direkte Ableitung und Instanzierung des abstrakten Broadcastreceivers
+        // Bewegung erkannt
+        motionDetectorReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(LOG_TAG, "motionDetectorReceiver-onReceive()");
+                Toast.makeText(getBaseContext(), "Motion detected",
+                        Toast.LENGTH_SHORT).show();
+                isMotionDetectedInLastMinute = true;
+                turnOnScreen();
+            }
+        };
+        handler = new Handler();
+        handler.post(controlScreenState);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -112,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         return false;
     }
 
-
     /**
      * Get IP address from first non-localhost interface
      *
@@ -128,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 for (InetAddress address : addresses) {
                     if (!address.isLoopbackAddress()) {
                         String addressAsString = address.getHostAddress().toUpperCase(Locale.GERMAN);
-                        boolean isIPv4 = InetAddressUtils.isIPv4Address(addressAsString);
+                        @SuppressWarnings("deprecation") boolean isIPv4 = InetAddressUtils.isIPv4Address(addressAsString);
                         if (isIPv4) {
                             return addressAsString;
                         }
@@ -140,6 +177,59 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         }
         return "";
     }
+
+    /**
+     * Beide Broadcastreceiver registrieren
+     */
+    public void onResume() {
+        Log.d(LOG_TAG, "onResume() Broadcastreceiver registriert");
+        super.onResume();
+        // Broadcastreceiver für entsprechende Actions registrieren
+        registerReceiver(motionDetectorReceiver, new IntentFilter("org.motion.detector.ACTION_GLOBAL_BROADCAST"));
+    }
+
+    public void onPause() {
+        Log.d(LOG_TAG, "onPause() Broadcastreceiver abgemeldet");
+        super.onPause();
+        if (motionDetectorReceiver != null) {
+            unregisterReceiver(motionDetectorReceiver);
+        }
+    }
+
+    public void turnOnScreen() {
+        // turn on screen
+        Log.d(LOG_TAG, "turnOnScreen");
+        //set the system brightness using the brightness variable value
+        android.provider.Settings.System.putInt(getContentResolver(), android.provider.Settings.System.SCREEN_BRIGHTNESS, 255);
+        //preview brightness changes at this window
+        //get the current window attributes
+        WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+        //set the brightness of this window
+        layoutParams.screenBrightness = 1;
+        //apply attribute changes to this window
+        getWindow().setAttributes(layoutParams);
+//        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "tag");
+//        wakeLock.acquire();
+    }
+
+    public void turnOffScreen() {
+        // turn off screen
+        Log.d(LOG_TAG, "turnOffScreen");
+        //set the system brightness using the brightness variable value
+        android.provider.Settings.System.putInt(getContentResolver(), android.provider.Settings.System.SCREEN_BRIGHTNESS, 0);
+        //preview brightness changes at this window
+        //get the current window attributes
+        WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+        //set the brightness of this window
+        layoutParams.screenBrightness = 0;
+        //apply attribute changes to this window
+        getWindow().setAttributes(layoutParams);
+//        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        wakeLock = powerManager.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "tag");
+//        wakeLock.acquire();
+    }
+
 
 
     @Override

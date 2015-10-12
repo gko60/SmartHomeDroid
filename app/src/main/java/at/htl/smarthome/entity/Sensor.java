@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import at.htl.smarthome.api.CsvFileManager;
 import at.htl.smarthome.repository.WeatherRepository;
 
 /**
@@ -100,28 +99,27 @@ public class Sensor {
     public void addValue(double newValue) {
         DateTime newDateTime = new DateTime();
         Date newDate = newDateTime.toDate();
-        double lastValue = getValue();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String lastDateString = sdf.format(actDate);
         String newDateString = sdf.format(newDate);
-        int quarterOfAnHour = getTimeSlotIndex(newDateTime);
+        int newQuarterOfAnHour = getTimeSlotIndex(newDateTime);
         if (!lastDateString.equals(newDateString)) {  // Tageswechsel
             // Werte des letzten Tages bis Mitternacht auffüllen
-            CsvFileManager.getInstance().traceLineToFile("Tageswechsel von: " + lastDateString + " auf: " + newDateString);
-            fillValues(actDateIndex, lastValue, actQuarterOfAnHour, 24 * 4);
+            //CsvFileManager.getInstance().traceLineToFile("Tageswechsel von: " + lastDateString + " auf: " + newDateString);
+            //fillValues(actDateIndex, getValue(), actQuarterOfAnHour, 24 * 4);
             // letzten Tag persisitieren
-            CsvFileManager.getInstance().persistYesterdaysMeasurements(this, lastDateString, values[actDateIndex]);
+            //CsvFileManager.getInstance().persistYesterdaysMeasurements(this, lastDateString, values[actDateIndex]);
             actDateIndex = getDayIndex(newDate);
-            lastValue = getDayStartValue(lastValue);  // bis zur aktuellen Viertelstunde füllen
+            double initialValue = getDayStartValue(getValue());  // bis zur aktuellen Viertelstunde füllen
             // bis zur aktuellen Viertelstunde füllen
-            fillValues(actDateIndex, lastValue, 0, quarterOfAnHour);
+            fillValues(actDateIndex, initialValue, 0, newQuarterOfAnHour);
             actQuarterOfAnHourValues.clear();
             actQuarterOfAnHourValues.add(newValue);
-            actQuarterOfAnHour = quarterOfAnHour;
+            actQuarterOfAnHour = newQuarterOfAnHour;
             actDate = newDate;
         } else {
             // Viertelstunde im aktuellen Tag
-            if (quarterOfAnHour == actQuarterOfAnHour) {  // neuer Wert für aktuelle Viertelstunde
+            if (newQuarterOfAnHour == actQuarterOfAnHour) {  // neuer Wert für aktuelle Viertelstunde
                 actQuarterOfAnHourValues.add(newValue);  // eintragen und Mittelwert neu berechnen
                 double sumOfValues = 0;
                 for (double v : actQuarterOfAnHourValues) {
@@ -132,14 +130,18 @@ public class Sensor {
                 // Viertelstundenwerte, die zwischen der letzten Änderung und jetzt liegen
                 // werden mit dem letzten Wert befüllt
                 // neue Mittelwertbildung beginnen
-                fillValues(actDateIndex, newValue, actQuarterOfAnHour, quarterOfAnHour);
-                values[0][quarterOfAnHour] = newValue;
+                fillValues(actDateIndex, getValue(), actQuarterOfAnHour, newQuarterOfAnHour);
                 actQuarterOfAnHourValues.clear();
                 actQuarterOfAnHourValues.add(newValue);
-                actQuarterOfAnHour = quarterOfAnHour;
-                WeatherRepository.getInstance().persistQuarterOfAnHour(this, quarterOfAnHour, newValue);
+                actQuarterOfAnHour = newQuarterOfAnHour;
+                values[actDateIndex][newQuarterOfAnHour] = newValue;
+                WeatherRepository.getInstance().persistQuarterOfAnHour(this, newQuarterOfAnHour, newValue);
             }
         }
+    }
+
+    public void setValue(int dayIndex, int quarterHour, double value) {
+        values[dayIndex][quarterHour] = value;
     }
 
     /**
@@ -171,7 +173,7 @@ public class Sensor {
      * @return Messwert der Viertelstunde
      */
     public double getValue(int index) {
-        return values[0][index];
+        return values[actDateIndex][index];
     }
 
 }

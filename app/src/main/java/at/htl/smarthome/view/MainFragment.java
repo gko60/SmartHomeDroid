@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import org.joda.time.DateTime;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -44,6 +47,9 @@ public class MainFragment extends Fragment implements Observer {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static String[] weekDayNames = {"Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"};
+    DateTime lastUpdateUiTime;
+    DateTime lastUpdateForecast;
+    Date nextPersistMeasurementsDate;
     Typeface roboto;
     View fragmentView;
     TextView tvDateTime;
@@ -60,10 +66,39 @@ public class MainFragment extends Fragment implements Observer {
     ImageView ivDayAfterTomorrow;
     TextView tvDayAfterTomorrowMinTemperature;
     TextView tvDayAfterTomorrowMaxTemperature;
+    private Handler handler;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
     private OnFragmentInteractionListener mListener;
+    private Runnable updateUI = new Runnable() {
+        @Override
+        public void run() {
+            DateTime now = new DateTime();
+            long delayedMilliSeconds = now.getMillis() - lastUpdateUiTime.getMillis();
+            if (delayedMilliSeconds > 60 * 1000) {  // alle Minuten UI aktualisieren
+                new CurrentWeatherParser().execute();  // verständigt dann UI, sich zu aktualisieren
+                lastUpdateUiTime = now;
+            }
+            delayedMilliSeconds = now.getMillis() - lastUpdateForecast.getMillis();
+            if (delayedMilliSeconds > 60 * 60 * 1000) {  // alle Stunden Vorhersage aktualisieren
+                new ForecastRestImporter().execute();  // verständigt dann UI, sich zu aktualisieren
+                lastUpdateForecast = now;
+            }
+            Date newDate = now.toDate();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String lastDateString = sdf.format(nextPersistMeasurementsDate);
+            String newDateString = sdf.format(newDate);
+            if (!lastDateString.equals(newDateString)) {
+                WeatherRepository.getInstance().appendMeasurementsToCsvFile(nextPersistMeasurementsDate);
+                nextPersistMeasurementsDate = newDate;
+            }
+
+            Log.d(LOG_TAG, "updateUI called");
+            // Repeat this runnable code again every 60 seconds
+            handler.postDelayed(updateUI, 60000);
+        }
+    };
 
     public MainFragment() {
         // Required empty public constructor
@@ -92,7 +127,6 @@ public class MainFragment extends Fragment implements Observer {
         new ForecastRestImporter().execute();
     }
 
-
     /**
      * Liefert den Tagesnamen für das Datum zurück
      *
@@ -105,7 +139,6 @@ public class MainFragment extends Fragment implements Observer {
         int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
         return weekDayNames[dayOfWeek - 1];
     }
-
 
     /*----------------------------------------------------------------------------------*/
     private TextView getTvDateTime() {
@@ -207,7 +240,6 @@ public class MainFragment extends Fragment implements Observer {
         return tvDayAfterTomorrowMaxTemperature;
     }
 
-
     /*----------------------------------------------------------------------------------*/
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -217,6 +249,10 @@ public class MainFragment extends Fragment implements Observer {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
         WeatherRepository.getInstance().addObserver(this);
+        handler = new Handler();
+        lastUpdateUiTime = new DateTime();
+        lastUpdateForecast = new DateTime();
+        nextPersistMeasurementsDate = new Date(System.currentTimeMillis());
     }
 
     @Override
@@ -224,6 +260,8 @@ public class MainFragment extends Fragment implements Observer {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
+        // Kick off the first runnable task right away
+        handler.post(updateUI);
         return fragmentView;
     }
 
