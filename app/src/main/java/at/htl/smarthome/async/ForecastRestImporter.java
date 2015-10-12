@@ -1,6 +1,7 @@
 package at.htl.smarthome.async;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -67,19 +68,19 @@ public class ForecastRestImporter extends AsyncTask<Void, Void, String> {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
             dayForecast.setDay(formatter.parse(dayString));
+            dayForecast.setMinTemperature(jsonObject.getInt("tn"));
+            dayForecast.setMaxTemperature(jsonObject.getInt("tx"));
+            dayForecast.setStatus(jsonObject.getString("w_txt"));
+            dayForecast.setAirPressure(jsonObject.getDouble("pc"));
+            dayForecast.setWindDirection(jsonObject.getString("wd_txt"));
+            dayForecast.setWindSpeed(jsonObject.getDouble("ws"));
+            String fileName = "d" + jsonObject.getString("w");
+            //Log.d(LOG_TAG, "parseDayIntoRepository(), IconFileName: " + fileName);
+            //dayForecast.setIcon(context.getResources().getIdentifier(fileName, "drawable", context.getPackageName()));
+            dayForecast.setIconFileName(fileName);
+            WeatherRepository.getInstance().addForecast(dayForecast);
         } catch (ParseException e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "parseDayIntoRepository(): " + e.getMessage());
         }
-        dayForecast.setMinTemperature(jsonObject.getInt("tn"));
-        dayForecast.setMaxTemperature(jsonObject.getInt("tx"));
-        dayForecast.setStatus(jsonObject.getString("w_txt"));
-        dayForecast.setAirPressure(jsonObject.getDouble("pc"));
-        dayForecast.setWindDirection(jsonObject.getString("wd_txt"));
-        dayForecast.setWindSpeed(jsonObject.getDouble("ws"));
-        String fileName = "d" + jsonObject.getString("w");
-        //Log.d(LOG_TAG, "parseDayIntoRepository(), IconFileName: " + fileName);
-        //dayForecast.setIcon(context.getResources().getIdentifier(fileName, "drawable", context.getPackageName()));
-        dayForecast.setIconFileName(fileName);
-        WeatherRepository.getInstance().addForecast(dayForecast);
     }
 }
