@@ -18,12 +18,12 @@ import org.joda.time.DateTime;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
 import at.htl.smarthome.OnFragmentInteractionListener;
 import at.htl.smarthome.R;
+import at.htl.smarthome.Utils;
 import at.htl.smarthome.async.CurrentWeatherParser;
 import at.htl.smarthome.async.ForecastRestImporter;
 import at.htl.smarthome.entity.DayForecast;
@@ -289,24 +289,6 @@ public class MainFragment extends Fragment implements Observer {
         mListener = null;
     }
 
-    /***
-     * Doubklewert mit entsprechenden Nachkommastellen gerundet
-     * als Text zurückgeben
-     *
-     * @param value         double-Wert
-     * @param decimalPlaces Anzahl Stellen
-     * @return Textdarstellung
-     */
-    private String getDoubleString(double value, int decimalPlaces) {
-        if (decimalPlaces == 0) {
-            int number = (int) Math.round(value);
-            return String.format(Locale.GERMAN, "%d", number);
-        } else {
-            String format = "%." + decimalPlaces + "f";
-            return String.format(Locale.GERMAN, format, value);
-        }
-    }
-
     @Override
     public void update(Observable observable, Object data) {
         WeatherRepository weatherRepository = WeatherRepository.getInstance();
@@ -317,7 +299,7 @@ public class MainFragment extends Fragment implements Observer {
         for (Sensor sensor : WeatherRepository.getInstance().getSensors()) {
             TextView textView = (TextView) fragmentView.findViewWithTag(sensor.getViewTag());
             if (textView != null) {
-                textView.setText(getDoubleString(sensor.getValue(), sensor.getDecimalPlaces()) + sensor.getUnit());
+                textView.setText(Utils.getDoubleString(sensor.getValue(), sensor.getDecimalPlaces()) + sensor.getUnit());
             }
         }
         Log.d(LOG_TAG, "update() + Imagefilename: " + WeatherRepository.getInstance().getActualWeatherIconFileName());
@@ -329,8 +311,8 @@ public class MainFragment extends Fragment implements Observer {
             getTvDayOfWeekToday().setText(getDayName(date));
             imgRessource = getActivity().getResources().getIdentifier(dayForecast.getIconFileName(), "drawable", getActivity().getPackageName());
             getIvToday().setImageResource(imgRessource);
-            getTvTodayMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
-            getTvTodayMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
+            getTvTodayMaxTemperature().setText(Utils.getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
+            getTvTodayMinTemperature().setText(Utils.getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
         }
         if (WeatherRepository.getInstance().getDayForecasts().size() > 1) {
             Calendar calendar = Calendar.getInstance();
@@ -340,8 +322,8 @@ public class MainFragment extends Fragment implements Observer {
             DayForecast dayForecast = WeatherRepository.getInstance().getDayForecasts().get(1);
             imgRessource = getActivity().getResources().getIdentifier(dayForecast.getIconFileName(), "drawable", getActivity().getPackageName());
             getIvTomorrow().setImageResource(imgRessource);
-            getTvTomorrowMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
-            getTvTomorrowMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
+            getTvTomorrowMaxTemperature().setText(Utils.getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
+            getTvTomorrowMinTemperature().setText(Utils.getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
         }
         if (WeatherRepository.getInstance().getDayForecasts().size() > 2) {
             Calendar calendar = Calendar.getInstance();
@@ -351,8 +333,8 @@ public class MainFragment extends Fragment implements Observer {
             DayForecast dayForecast = WeatherRepository.getInstance().getDayForecasts().get(2);
             imgRessource = getActivity().getResources().getIdentifier(dayForecast.getIconFileName(), "drawable", getActivity().getPackageName());
             getIvDayAfterTomorrow().setImageResource(imgRessource);
-            getTvDayAfterTomorrowMaxTemperature().setText(getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
-            getTvDayAfterTomorrowMinTemperature().setText(getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
+            getTvDayAfterTomorrowMaxTemperature().setText(Utils.getDoubleString(dayForecast.getMaxTemperature(), 1) + " °");
+            getTvDayAfterTomorrowMinTemperature().setText(Utils.getDoubleString(dayForecast.getMinTemperature(), 1) + " °");
         }
 
     }

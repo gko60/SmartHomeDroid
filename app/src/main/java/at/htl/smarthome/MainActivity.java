@@ -2,13 +2,16 @@ package at.htl.smarthome;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -31,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 
 import at.htl.smarthome.api.HomematicRpcHandler;
+import at.htl.smarthome.commandservice.CommandInterpreterService;
 import at.htl.smarthome.entity.Settings;
 import at.htl.smarthome.view.ControlFragment;
 import at.htl.smarthome.view.MainFragment;
@@ -56,9 +60,11 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     ViewPager mViewPager;
     boolean isMotionDetectedInLastMinute = true;
     PowerManager.WakeLock wakeLock;
+    // Binder bilden das Schnittstellenobjekt (Contract) zum Service
+    CommandInterpreterService.CommandInterpreterServiceBinder commandInterpreterServiceBinder;
     private Handler handler;
     /**
-     * Wird alle 10 Sekunden per post aufgerufen.
+     * Wird alle 60 Sekunden per post aufgerufen.
      * Überprüft, ob in der letzten Minute eine
      * Bewegung auftrat und schaltet, falls nicht
      * den Bildschirm ab.
@@ -70,9 +76,22 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 turnOffScreen();
             }
             isMotionDetectedInLastMinute = false;
-            handler.postDelayed(controlScreenState, 10000);
+            handler.postDelayed(controlScreenState, 60000);
         }
     };
+    // ServiceConnection repräsentiert die Verbindung zum Service
+    private ServiceConnection commandInterpreterServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder binder) {
+            commandInterpreterServiceBinder = ((CommandInterpreterService.CommandInterpreterServiceBinder) binder);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            commandInterpreterServiceBinder = null;
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,14 +205,19 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         super.onResume();
         // Broadcastreceiver für entsprechende Actions registrieren
         registerReceiver(motionDetectorReceiver, new IntentFilter("org.motion.detector.ACTION_GLOBAL_BROADCAST"));
+        Log.d(LOG_TAG, "onResume() CommandInterpreterService gebunden");
+        final Intent commandInterpreterServiceIntent = new Intent(this, CommandInterpreterService.class);
+        bindService(commandInterpreterServiceIntent, commandInterpreterServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void onPause() {
-        Log.d(LOG_TAG, "onPause() Broadcastreceiver abgemeldet");
-        super.onPause();
+        unbindService(commandInterpreterServiceConnection);
+        stopService(new Intent(this, CommandInterpreterService.class));
+        Log.d(LOG_TAG, "onResume() CommandServer gestoppt");
         if (motionDetectorReceiver != null) {
             unregisterReceiver(motionDetectorReceiver);
         }
+        super.onPause();
     }
 
     public void turnOnScreen() {
@@ -222,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         //get the current window attributes
         WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
         //set the brightness of this window
-        layoutParams.screenBrightness = 0;
+        layoutParams.screenBrightness = 0f;
         //apply attribute changes to this window
         getWindow().setAttributes(layoutParams);
 //        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);

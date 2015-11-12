@@ -106,15 +106,15 @@ public class Sensor {
         if (!lastDateString.equals(newDateString)) {  // Tageswechsel
             // Werte des letzten Tages bis Mitternacht auffüllen
             //CsvFileManager.getInstance().traceLineToFile("Tageswechsel von: " + lastDateString + " auf: " + newDateString);
-            //fillValues(actDateIndex, getValue(), actQuarterOfAnHour, 24 * 4);
+            fillValues(actDateIndex, getValue(), actQuarterOfAnHour, 24 * 4);
             // letzten Tag persisitieren
             //CsvFileManager.getInstance().persistYesterdaysMeasurements(this, lastDateString, values[actDateIndex]);
             actDateIndex = getDayIndex(newDate);
             double initialValue = getDayStartValue(getValue());  // bis zur aktuellen Viertelstunde füllen
             // bis zur aktuellen Viertelstunde füllen
-            fillValues(actDateIndex, initialValue, 0, newQuarterOfAnHour);
             actQuarterOfAnHourValues.clear();
-            actQuarterOfAnHourValues.add(newValue);
+            fillValues(actDateIndex, initialValue, 0, newQuarterOfAnHour);
+            actQuarterOfAnHourValues.add(initialValue);
             actQuarterOfAnHour = newQuarterOfAnHour;
             actDate = newDate;
         } else {
