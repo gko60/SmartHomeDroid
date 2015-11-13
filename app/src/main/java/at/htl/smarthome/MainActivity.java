@@ -37,6 +37,7 @@ import at.htl.smarthome.api.HomematicRpcHandler;
 import at.htl.smarthome.commandservice.CommandInterpreterService;
 import at.htl.smarthome.entity.Settings;
 import at.htl.smarthome.view.ControlFragment;
+import at.htl.smarthome.view.LedWallFragment;
 import at.htl.smarthome.view.MainFragment;
 
 
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     BroadcastReceiver motionDetectorReceiver;
     MainFragment mainFragment;
+    LedWallFragment ledWallFragment;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -272,6 +274,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
             super(fm);
             mainFragment = new MainFragment();
             controlFragment = new ControlFragment();
+            ledWallFragment = new LedWallFragment();
         }
 
         @Override
@@ -279,7 +282,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
             if (position == 0) {
                 return mainFragment;
             } else if (position == 1) {
-                return controlFragment;
+                return ledWallFragment;
             }
             return mainFragment;
         }
@@ -297,9 +300,9 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 case 0:
                     return getString(R.string.title_section_main).toUpperCase(l);
                 case 1:
-                    return getString(R.string.title_section_control).toUpperCase(l);
+                    return getString(R.string.title_section_ledwall).toUpperCase(l);
                 case 2:
-                    return getString(R.string.title_section3).toUpperCase(l);
+                    return getString(R.string.title_section_control).toUpperCase(l);
             }
             return null;
         }

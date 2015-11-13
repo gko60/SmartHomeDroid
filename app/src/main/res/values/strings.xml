@@ -2,6 +2,7 @@
     <string name="app_name">SmartHome</string>
 
     <string name="title_section_main">Mainfragment</string>
+    <string name="title_section_ledwall">LED-Wall</string>
     <string name="title_section_control">Gerätesteuerung</string>
     <string name="title_section3">Section 3</string>
 
@@ -35,5 +36,11 @@
     <string name="tagHumidityLivingRoom">tag_humidityLivingRoom</string>
     <string name="tagTemperatureCellar">tag_temperatureCellar</string>
     <string name="tagHumidityCellar">tag_humidityCellar</string>
+    <string name="txt_out">Aus</string>
+    <string name="txt_ledwalltext">Text für Ledwall:</string>
+    <string name="txt_color_changer">Farblichtwechsler</string>
+    <string name="txt_brightness">Helligkeit:</string>
+    <string name="txt_default_info_text">Standardinformation</string>
+    <string name="txt_fix_text_ledwall">Fixer Text für Ledwall</string>
 
 </resources>

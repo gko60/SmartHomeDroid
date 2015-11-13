@@ -1,0 +1,104 @@
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="20dp"
+    android:columnCount="4"
+    android:columnOrderPreserved="false"
+    android:orientation="vertical"
+    android:rowCount="6">
+
+    <RadioButton
+        android:id="@+id/radioButtonOut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_gravity="left|center"
+        android:layout_margin="10dp"
+        android:layout_row="0"
+        android:text="@string/txt_out"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    />
+
+
+    <RadioButton
+        android:id="@+id/radioButtonLight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_gravity="left|center"
+        android:layout_margin="10dp"
+        android:layout_row="1"
+        android:text="@string/txt_brightness"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    />
+
+    <SeekBar
+        android:id="@+id/seekBarBrightness"
+        android:layout_width="300dp"
+        android:layout_column="1"
+        android:layout_gravity="left|center"
+        android:layout_margin="10dp"
+        android:layout_row="1" />
+
+    <RadioButton
+        android:id="@+id/radioButtonLedWallText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_gravity="left|center"
+        android:layout_margin="10dp"
+        android:layout_row="2"
+        android:text="@string/txt_ledwalltext"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    />
+
+    <EditText
+        android:id="@+id/editTextLedWallText"
+        android:layout_width="wrap_content"
+        android:layout_column="1"
+        android:layout_gravity="left|center"
+        android:layout_row="2"
+        android:gravity="left"
+        android:hint="@string/txt_fix_text_ledwall"
+        android:inputType="text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <RadioButton
+        android:id="@+id/radioButtonDefaultInfoText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_gravity="left|center"
+        android:layout_margin="10dp"
+        android:layout_row="3"
+        android:checked="true"
+        android:text="@string/txt_default_info_text"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    />
+
+    <RadioButton
+        android:id="@+id/radioButtonColorChanger"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_gravity="left|center"
+        android:layout_margin="10dp"
+        android:layout_row="4"
+        android:text="@string/txt_color_changer"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    />
+
+    <RadioButton
+        android:id="@+id/radioButtonColorPicker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_column="0"
+        android:layout_gravity="left|center"
+        android:layout_margin="10dp"
+        android:layout_row="5"
+        android:text="Farbauswahl"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    />
+
+
+</GridLayout>
