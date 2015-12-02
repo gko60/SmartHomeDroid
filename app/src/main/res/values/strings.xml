@@ -42,5 +42,6 @@
     <string name="txt_brightness">Helligkeit:</string>
     <string name="txt_default_info_text">Standardinformation</string>
     <string name="txt_fix_text_ledwall">Fixer Text für Ledwall</string>
+    <string name="txt_ok">OK</string>
 
 </resources>

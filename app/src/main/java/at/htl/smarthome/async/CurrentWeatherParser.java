@@ -7,8 +7,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import at.htl.smarthome.api.WeatherAPI;
 import at.htl.smarthome.repository.WeatherRepository;
+import at.htl.smarthome.services.WeatherAPI;
 
 
 /**

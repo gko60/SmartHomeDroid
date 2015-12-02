@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
-import at.htl.smarthome.api.CsvFileManager;
 import at.htl.smarthome.entity.DayForecast;
 import at.htl.smarthome.entity.HomematicSensor;
 import at.htl.smarthome.entity.RainToday;
 import at.htl.smarthome.entity.Sensor;
 import at.htl.smarthome.entity.SunshineDuration;
+import at.htl.smarthome.services.CsvFileManager;
 
 
 /**
@@ -171,6 +171,7 @@ public class WeatherRepository extends Observable {
     public void addTemperatureOut(double value) {
         temperatureOut.addValue(value);
         setChanged();
+        notifyObservers();
     }
 
     public void addAirPressure(double value) {

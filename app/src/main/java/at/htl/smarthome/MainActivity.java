@@ -33,9 +33,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import at.htl.smarthome.api.HomematicRpcHandler;
 import at.htl.smarthome.commandservice.CommandInterpreterService;
 import at.htl.smarthome.entity.Settings;
+import at.htl.smarthome.services.HomematicRpcHandler;
 import at.htl.smarthome.view.ControlFragment;
 import at.htl.smarthome.view.LedWallFragment;
 import at.htl.smarthome.view.MainFragment;

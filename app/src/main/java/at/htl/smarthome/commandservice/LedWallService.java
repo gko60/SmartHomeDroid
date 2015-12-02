@@ -35,6 +35,20 @@ public class LedWallService {
         this.commandType = "INFO";
     }
 
+    public void setLightCommand(int brightness) {
+        commandType = "LIGHT";
+        brightness = Math.min(90, brightness); // 100% schafft die Stromversorgung nicht
+        this.text = "255 255 255 " + brightness;
+        Log.d(LOG_TAG, " setLightCommand: " + text);
+    }
+
+    public void setColorPickerCommand(int r, int g, int b) {
+        commandType = "COLORPICKER";
+        this.text = r + " " + g + " " + b + " 30";
+        Log.d(LOG_TAG, " setColorPickerCommand: " + text);
+    }
+
+
     public void setTextCommand(String text) {
         commandType = "TEXT";
         this.text = text;
@@ -56,6 +70,12 @@ public class LedWallService {
                 break;
             case "TEXT":
                 command = "T" + text;
+                break;
+            case "COLORPICKER":
+                command = "C " + text;
+                break;
+            case "LIGHT":
+                command = "C " + text;
                 break;
         }
         return command;

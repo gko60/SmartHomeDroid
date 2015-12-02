@@ -1,4 +1,4 @@
-package at.htl.smarthome.api;
+package at.htl.smarthome.services;
 
 import android.os.Environment;
 import android.util.Log;

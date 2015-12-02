@@ -13,7 +13,7 @@ import android.widget.EditText;
 
 import at.htl.smarthome.OnFragmentInteractionListener;
 import at.htl.smarthome.R;
-import at.htl.smarthome.api.GcmSender;
+import at.htl.smarthome.services.GcmSender;
 
 
 /**

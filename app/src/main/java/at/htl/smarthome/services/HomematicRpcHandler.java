@@ -1,4 +1,4 @@
-package at.htl.smarthome.api;
+package at.htl.smarthome.services;
 
 import android.os.AsyncTask;
 import android.os.Build;

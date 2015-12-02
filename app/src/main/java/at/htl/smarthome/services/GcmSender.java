@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package at.htl.smarthome.api;
+package at.htl.smarthome.services;
 
 import android.os.AsyncTask;
 import android.util.Log;

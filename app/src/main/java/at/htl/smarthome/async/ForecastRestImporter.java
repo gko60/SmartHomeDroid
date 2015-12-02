@@ -10,9 +10,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Iterator;
 
-import at.htl.smarthome.api.WeatherAPI;
 import at.htl.smarthome.entity.DayForecast;
 import at.htl.smarthome.repository.WeatherRepository;
+import at.htl.smarthome.services.WeatherAPI;
 
 
 /**

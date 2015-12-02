@@ -1,14 +1,22 @@
 package at.htl.smarthome.view;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.SeekBar;
+
+import com.github.danielnilsson9.colorpickerview.view.ColorPickerView;
+
+import java.util.ArrayList;
 
 import at.htl.smarthome.OnFragmentInteractionListener;
 import at.htl.smarthome.R;
@@ -26,6 +34,7 @@ public class LedWallFragment extends Fragment implements View.OnClickListener {
     private static final String LOG_TAG = LedWallFragment.class.getSimpleName();
 
     View fragmentView;
+    ArrayList<RadioButton> radioButtons;
     private Handler handler;
     private RadioButton radioButtonOut;
     private RadioButton radioButtonColorChanger;
@@ -35,6 +44,10 @@ public class LedWallFragment extends Fragment implements View.OnClickListener {
     private RadioButton radioButtonColorPicker;
     private LedWallService ledWallService;
     private EditText etLedWallText;
+    private Button buttonOk;
+    private ColorPickerView colorPickerView;
+    private SeekBar seekBarBrightness;
+
 
     private OnFragmentInteractionListener mListener;
     private Runnable updateUI = new Runnable() {
@@ -76,13 +89,21 @@ public class LedWallFragment extends Fragment implements View.OnClickListener {
         radioButtonLedWallText = (RadioButton) fragmentView.findViewById(R.id.radioButtonLedWallText);
         radioButtonLight = (RadioButton) fragmentView.findViewById(R.id.radioButtonLight);
         radioButtonColorPicker = (RadioButton) fragmentView.findViewById(R.id.radioButtonColorPicker);
+        radioButtons = new ArrayList<>();
+        radioButtons.add(radioButtonOut);
+        radioButtons.add(radioButtonColorChanger);
+        radioButtons.add(radioButtonDefaultInfoText);
+        radioButtons.add(radioButtonLedWallText);
+        radioButtons.add(radioButtonLight);
+        radioButtons.add(radioButtonColorPicker);
         etLedWallText = (EditText) fragmentView.findViewById(R.id.editTextLedWallText);
-        radioButtonOut.setOnClickListener(this);
-        radioButtonColorChanger.setOnClickListener(this);
-        radioButtonDefaultInfoText.setOnClickListener(this);
-        radioButtonLedWallText.setOnClickListener(this);
-        radioButtonLight.setOnClickListener(this);
-        radioButtonColorPicker.setOnClickListener(this);
+        seekBarBrightness = (SeekBar) fragmentView.findViewById(R.id.seekBarBrightness);
+        for (RadioButton radioButton : radioButtons) {
+            radioButton.setOnClickListener(this);
+        }
+        buttonOk = (Button) fragmentView.findViewById(R.id.buttonSetLedWall);
+        buttonOk.setOnClickListener(this);
+        colorPickerView = (ColorPickerView) fragmentView.findViewById(R.id.colorpickerview__color_picker_view);
         ledWallService = LedWallService.getInstance();
 
 
@@ -109,28 +130,33 @@ public class LedWallFragment extends Fragment implements View.OnClickListener {
 
 
     @Override
-    public void onClick(View radioButton) {
-        radioButtonOut.setChecked(false);
-        radioButtonColorChanger.setChecked(false);
-        radioButtonDefaultInfoText.setChecked(false);
-        radioButtonLedWallText.setChecked(false);
-        radioButtonLight.setChecked(false);
-        if (radioButton == radioButtonOut) {
-            radioButtonOut.setChecked(true);
-        } else if (radioButton == radioButtonColorChanger) {
-            radioButtonColorChanger.setChecked(true);
-        } else if (radioButton == radioButtonDefaultInfoText) {
-            radioButtonDefaultInfoText.setChecked(true);
-            ledWallService.setInfoCommand();
-        } else if (radioButton == radioButtonLedWallText) {
-            radioButtonLedWallText.setChecked(true);
-            String text = etLedWallText.getText().toString();
-            ledWallService.setTextCommand(text);
-        } else if (radioButton == radioButtonLight) {
-            radioButtonLight.setChecked(true);
-        } else if (radioButton == radioButtonColorPicker) {
-            radioButtonColorPicker.setChecked(true);
+    public void onClick(View button) {
+        if (button == buttonOk) {
+            if (radioButtonOut.isChecked()) {
+            } else if (radioButtonColorChanger.isChecked()) {
+            } else if (radioButtonDefaultInfoText.isChecked()) {
+                ledWallService.setInfoCommand();
+            } else if (radioButtonLedWallText.isChecked()) {
+                String text = etLedWallText.getText().toString();
+                ledWallService.setTextCommand(text);
+            } else if (radioButtonLight.isChecked()) {
+                int brightness = seekBarBrightness.getProgress();
+                ledWallService.setLightCommand(brightness);
+            } else if (radioButtonColorPicker.isChecked()) {
+                int color = colorPickerView.getColor();
+                int alpha = Color.alpha(color);
+                int red = Color.red(color);
+                int blue = Color.blue(color);
+                int green = Color.green(color);
+                Log.d(LOG_TAG, "Set ColorPicker to A: " + alpha + ", R: " + red + ", G: " + green + ", B: " + blue + " color: " + color);
+                ledWallService.setColorPickerCommand(red, green, blue);
+            }
+        } else {  // Radiobutton wurde ausgewählt
+            for (RadioButton radioButton : radioButtons) {
+                if (radioButton != button && radioButton.isChecked()) {
+                    radioButton.setChecked(false);
+                }
+            }
         }
-
     }
 }
