@@ -50,7 +50,7 @@ public class LedWallService {
 
 
     public void setTextCommand(String text) {
-        commandType = "TEXT";
+        commandType = "FADETEXT";
         this.text = text;
     }
 
@@ -68,8 +68,8 @@ public class LedWallService {
                 isInfoDateTime = !isInfoDateTime;
                 Log.d(LOG_TAG, "getCommand() isInfoDateTime: " + isInfoDateTime);
                 break;
-            case "TEXT":
-                command = "T" + text;
+            case "FADETEXT":
+                command = "S" + text;
                 break;
             case "COLORPICKER":
                 command = "C " + text;
