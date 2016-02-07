@@ -15,11 +15,13 @@ import at.htl.smarthome.repository.WeatherRepository;
  */
 public class LedWallService {
     private static final String LOG_TAG = LedWallService.class.getSimpleName();
+    private static final int PAGE_DATE = 0;
+    private static final int PAGE_TIME = 1;
+    private static final int PAGE_TEMPERATURE = 2;
     private static LedWallService instance = null;
-
     private String commandType;  // Nächstes zu versendendes Kommando
     private String text;
-    private boolean isInfoDateTime = true;
+    private int pageNumber = 0;
 
     private LedWallService() {
 
@@ -56,17 +58,28 @@ public class LedWallService {
 
     public String getCommand() {
         String command = "";
+        SimpleDateFormat sdf;
         switch (commandType) {
             case "INFO":
-                if (isInfoDateTime) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM. HH:mm:ss");
-                    command = "T" + sdf.format(new Date());
-                } else {
-                    Sensor temperatureOut = WeatherRepository.getInstance().getSensor("tag_hmTemperatureOut");
-                    command = "T" + Utils.getDoubleString(temperatureOut.getValue(), 1) + " Grad";
+                switch (pageNumber) {
+                    case 0:
+                        sdf = new SimpleDateFormat("dd.MM.yyyy");
+                        command = "T" + sdf.format(new Date());
+                        break;
+                    case 1:
+                        sdf = new SimpleDateFormat("HH:mm:ss");
+                        command = "T" + sdf.format(new Date());
+                        break;
+                    case 2:
+                        Sensor temperatureOut = WeatherRepository.getInstance().getSensor("tag_hmTemperatureOut");
+                        command = "T" + Utils.getDoubleString(temperatureOut.getValue(), 1) + " Grad";
+                        break;
                 }
-                isInfoDateTime = !isInfoDateTime;
-                Log.d(LOG_TAG, "getCommand() isInfoDateTime: " + isInfoDateTime);
+                pageNumber++;
+                if (pageNumber >= 3) {
+                    pageNumber = 0;
+                }
+                Log.d(LOG_TAG, "getCommand() pageNumber: " + pageNumber);
                 break;
             case "FADETEXT":
                 command = "S" + text;

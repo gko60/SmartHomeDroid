@@ -25,7 +25,7 @@ public class Sensor {
     private String viewTag;        // Name des Sensors
     private int decimalPlaces;
     private String unit;        // Einheit
-    private Date actDate;   // Aktuelles Datum
+    private Date lastMeasurementTime;   // Aktuelles Datum
     private int actDateIndex;
     private int actQuarterOfAnHour; // Aktuelle Viertelstunde
     private List<Double> actQuarterOfAnHourValues;  // aktuelle Werte innerhalb der Viertelstunde
@@ -37,8 +37,8 @@ public class Sensor {
         this.decimalPlaces = decimalPlaces;
         this.unit = unit;
         DateTime dateTime = new DateTime();
-        actDate = dateTime.toDate();
-        actDateIndex = getDayIndex(actDate);
+        lastMeasurementTime = dateTime.toDate();
+        actDateIndex = getDayIndex(lastMeasurementTime);
         actQuarterOfAnHour = getTimeSlotIndex(dateTime);
         actQuarterOfAnHourValues = new LinkedList<>();
         values = new double[DAY_BUFFER_LENGTH][24 * 4];
@@ -76,6 +76,10 @@ public class Sensor {
         return unit;
     }
 
+    public Date getLastMeasurementTime() {
+        return lastMeasurementTime;
+    }
+
     /**
      * Füllt das Wertearray am aktuellen Tag im Bereich from - to (exkl)
      * mit dem Wert
@@ -100,7 +104,7 @@ public class Sensor {
         DateTime newDateTime = new DateTime();
         Date newDate = newDateTime.toDate();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String lastDateString = sdf.format(actDate);
+        String lastDateString = sdf.format(lastMeasurementTime);
         String newDateString = sdf.format(newDate);
         int newQuarterOfAnHour = getTimeSlotIndex(newDateTime);
         if (!lastDateString.equals(newDateString)) {  // Tageswechsel
@@ -116,7 +120,7 @@ public class Sensor {
             fillValues(actDateIndex, initialValue, 0, newQuarterOfAnHour);
             actQuarterOfAnHourValues.add(initialValue);
             actQuarterOfAnHour = newQuarterOfAnHour;
-            actDate = newDate;
+            lastMeasurementTime = newDate;
         } else {
             // Viertelstunde im aktuellen Tag
             if (newQuarterOfAnHour == actQuarterOfAnHour) {  // neuer Wert für aktuelle Viertelstunde

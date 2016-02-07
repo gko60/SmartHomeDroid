@@ -1,6 +1,7 @@
 package at.htl.smarthome.view;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -300,6 +301,12 @@ public class MainFragment extends Fragment implements Observer {
             TextView textView = (TextView) fragmentView.findViewWithTag(sensor.getViewTag());
             if (textView != null) {
                 textView.setText(Utils.getDoubleString(sensor.getValue(), sensor.getDecimalPlaces()) + sensor.getUnit());
+                long delay = now.getTime() - sensor.getLastMeasurementTime().getTime();
+                if (delay > 300000) {  // 300.000 ms ==> 5 Minuten
+                    textView.setTextColor(Color.RED);
+                } else {
+                    textView.setTextColor(Color.BLACK);
+                }
             }
         }
         Log.d(LOG_TAG, "update() + Imagefilename: " + WeatherRepository.getInstance().getActualWeatherIconFileName());
