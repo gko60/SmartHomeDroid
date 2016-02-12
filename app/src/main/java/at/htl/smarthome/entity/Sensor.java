@@ -25,7 +25,8 @@ public class Sensor {
     private String viewTag;        // Name des Sensors
     private int decimalPlaces;
     private String unit;        // Einheit
-    private Date lastMeasurementTime;   // Aktuelles Datum
+    private DateTime actDate;   // Aktuelles Datum
+    private DateTime lastMeasurementTime;
     private int actDateIndex;
     private int actQuarterOfAnHour; // Aktuelle Viertelstunde
     private List<Double> actQuarterOfAnHourValues;  // aktuelle Werte innerhalb der Viertelstunde
@@ -36,10 +37,10 @@ public class Sensor {
         this.viewTag = viewTag;
         this.decimalPlaces = decimalPlaces;
         this.unit = unit;
-        DateTime dateTime = new DateTime();
-        lastMeasurementTime = dateTime.toDate();
-        actDateIndex = getDayIndex(lastMeasurementTime);
-        actQuarterOfAnHour = getTimeSlotIndex(dateTime);
+        actDate = new DateTime();
+        lastMeasurementTime = actDate;
+        actDateIndex = getDayIndex(actDate.toDate());
+        actQuarterOfAnHour = getTimeSlotIndex(actDate);
         actQuarterOfAnHourValues = new LinkedList<>();
         values = new double[DAY_BUFFER_LENGTH][24 * 4];
     }
@@ -76,7 +77,11 @@ public class Sensor {
         return unit;
     }
 
-    public Date getLastMeasurementTime() {
+    public DateTime getActDate() {
+        return actDate;
+    }
+
+    public DateTime getLastMeasurementTime() {
         return lastMeasurementTime;
     }
 
@@ -101,26 +106,26 @@ public class Sensor {
      * @param newValue neuer Messwert
      */
     public void addValue(double newValue) {
-        DateTime newDateTime = new DateTime();
-        Date newDate = newDateTime.toDate();
+        lastMeasurementTime = new DateTime();
+        DateTime newDate = lastMeasurementTime;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String lastDateString = sdf.format(lastMeasurementTime);
-        String newDateString = sdf.format(newDate);
-        int newQuarterOfAnHour = getTimeSlotIndex(newDateTime);
+        String lastDateString = sdf.format(actDate.toDate());
+        String newDateString = sdf.format(newDate.toDate());
+        int newQuarterOfAnHour = getTimeSlotIndex(lastMeasurementTime);
         if (!lastDateString.equals(newDateString)) {  // Tageswechsel
             // Werte des letzten Tages bis Mitternacht auffüllen
             //CsvFileManager.getInstance().traceLineToFile("Tageswechsel von: " + lastDateString + " auf: " + newDateString);
             fillValues(actDateIndex, getValue(), actQuarterOfAnHour, 24 * 4);
             // letzten Tag persisitieren
             //CsvFileManager.getInstance().persistYesterdaysMeasurements(this, lastDateString, values[actDateIndex]);
-            actDateIndex = getDayIndex(newDate);
+            actDateIndex = getDayIndex(newDate.toDate());
             double initialValue = getDayStartValue(getValue());  // bis zur aktuellen Viertelstunde füllen
             // bis zur aktuellen Viertelstunde füllen
             actQuarterOfAnHourValues.clear();
             fillValues(actDateIndex, initialValue, 0, newQuarterOfAnHour);
             actQuarterOfAnHourValues.add(initialValue);
             actQuarterOfAnHour = newQuarterOfAnHour;
-            lastMeasurementTime = newDate;
+            actDate = newDate;
         } else {
             // Viertelstunde im aktuellen Tag
             if (newQuarterOfAnHour == actQuarterOfAnHour) {  // neuer Wert für aktuelle Viertelstunde

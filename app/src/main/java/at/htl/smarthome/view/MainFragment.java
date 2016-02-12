@@ -293,17 +293,19 @@ public class MainFragment extends Fragment implements Observer {
     @Override
     public void update(Observable observable, Object data) {
         WeatherRepository weatherRepository = WeatherRepository.getInstance();
-        Date now = new Date();
+        DateTime now = new DateTime();
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-        String dateTimeString = sdf.format(now);
-        getTvDateTime().setText(getDayName(now) + ", " + dateTimeString);
+        String dateTimeString = sdf.format(now.toDate());
+        getTvDateTime().setText(getDayName(now.toDate()) + ", " + dateTimeString);
         for (Sensor sensor : WeatherRepository.getInstance().getSensors()) {
             TextView textView = (TextView) fragmentView.findViewWithTag(sensor.getViewTag());
             if (textView != null) {
                 textView.setText(Utils.getDoubleString(sensor.getValue(), sensor.getDecimalPlaces()) + sensor.getUnit());
-                long delay = now.getTime() - sensor.getLastMeasurementTime().getTime();
+                long delay = now.getMillis() - sensor.getLastMeasurementTime().getMillis();
                 if (delay > 300000) {  // 300.000 ms ==> 5 Minuten
+                    String sensorTimeString = sdf.format(sensor.getActDate().toDate());
                     textView.setTextColor(Color.RED);
+                    Log.d(LOG_TAG, "WriteSensorValue() Time: " + sensorTimeString);
                 } else {
                     textView.setTextColor(Color.BLACK);
                 }

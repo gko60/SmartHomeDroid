@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
+import at.htl.smarthome.entity.Brightness;
 import at.htl.smarthome.entity.DayForecast;
 import at.htl.smarthome.entity.HomematicSensor;
+import at.htl.smarthome.entity.RainCounterAll;
 import at.htl.smarthome.entity.RainToday;
 import at.htl.smarthome.entity.Sensor;
 import at.htl.smarthome.entity.SunshineDuration;
@@ -54,11 +56,11 @@ public class WeatherRepository extends Observable {
         airPressure = new Sensor(2, "tag_airPressure", 1, " hPa");
         hmTemperatureOut = new HomematicSensor(3, "tag_hmTemperatureOut", 1, "°", "LEQ0214590:1", "TEMPERATURE");
         humidityOut = new HomematicSensor(4, "tag_humidityOut", 0, "%", "LEQ0214590:1", "HUMIDITY");
-        rainCounterAll = new HomematicSensor(5, "tag_rainCounterAll", 1, " mm", "LEQ0214590:1", "RAIN_COUNTER");
         rainToday = new RainToday(6, "tag_rainToday", 1, " mm");
+        rainCounterAll = new RainCounterAll(5, "tag_rainCounterAll", 1, " mm", "LEQ0214590:1", "RAIN_COUNTER", rainToday);
         windSpeed = new HomematicSensor(7, "tag_windSpeed", 0, " km/h", "LEQ0214590:1", "WIND_SPEED");
         windDirection = new HomematicSensor(8, "tag_windDirection", 0, "°", "LEQ0214590:1", "WIND_DIRECTION");
-        brightness = new HomematicSensor(9, "tag_brightness", 0, "%", "LEQ0214590:1", "BRIGHTNESS");
+        brightness = new Brightness(9, "tag_brightness", 0, "%", "LEQ0214590:1", "BRIGHTNESS");
         sunshineDuration = new SunshineDuration(10, "tag_sunshineDuration", 1, " h", "LEQ0214590:1", "SUNSHINEDURATION");
         temperatureLivingRoom = new HomematicSensor(11, "tag_temperatureLivingRoom", 1, "°", "KEQ0850330:1", "TEMPERATURE");
         humidityLivingRoom = new HomematicSensor(12, "tag_humidityLivingRoom", 0, "%", "KEQ0850330:1", "HUMIDITY");
