@@ -29,6 +29,7 @@ public class WeatherRepository extends Observable {
     private String actualWeatherIconFileName;
     private Sensor temperatureOut;
     private Sensor airPressure;
+    private HomematicSensor hmPowerMeter;
     private HomematicSensor hmTemperatureOut;
     private HomematicSensor humidityOut;
     private HomematicSensor rainCounterAll;
@@ -41,6 +42,7 @@ public class WeatherRepository extends Observable {
     private HomematicSensor humidityLivingRoom;
     private HomematicSensor temperatureCellar;
     private HomematicSensor humidityCellar;
+    private HomematicSensor gardenWater;
 
     private List<DayForecast> dayForecasts;
     private Map<String, HomematicSensor> homematicSensors;
@@ -54,6 +56,7 @@ public class WeatherRepository extends Observable {
         sensors = new HashMap<>();
         temperatureOut = new Sensor(1, "tag_temperatureOut", 1, "°");
         airPressure = new Sensor(2, "tag_airPressure", 1, " hPa");
+        hmPowerMeter = new HomematicSensor(16, "tag_hmPowerMeter", 1, "W", "MEQ0703687:1", "POWER");
         hmTemperatureOut = new HomematicSensor(3, "tag_hmTemperatureOut", 1, "°", "LEQ0214590:1", "TEMPERATURE");
         humidityOut = new HomematicSensor(4, "tag_humidityOut", 0, "%", "LEQ0214590:1", "HUMIDITY");
         rainToday = new RainToday(6, "tag_rainToday", 1, " mm");
@@ -66,9 +69,11 @@ public class WeatherRepository extends Observable {
         humidityLivingRoom = new HomematicSensor(12, "tag_humidityLivingRoom", 0, "%", "KEQ0850330:1", "HUMIDITY");
         temperatureCellar = new HomematicSensor(13, "tag_temperatureCellar", 1, "°", "LEQ0228587:1", "TEMPERATURE");
         humidityCellar = new HomematicSensor(14, "tag_humidityCellar", 0, "%", "LEQ0228587:1", "HUMIDITY");
+        gardenWater = new HomematicSensor(15, "tag_gardenWater", 0, "l", "WATERSTORAGE", "LEVEL");
         sensors.put("tag_temperatureOut", temperatureOut);
         sensors.put("tag_airPressure", airPressure);
         sensors.put("tag_hmTemperatureOut", hmTemperatureOut);
+        sensors.put("tag_hmPowerMeter", hmPowerMeter);
         sensors.put("tag_humidityOut", humidityOut);
         sensors.put("tag_rainCounterAll", rainCounterAll);
         sensors.put("tag_rainToday", rainToday);
@@ -80,8 +85,10 @@ public class WeatherRepository extends Observable {
         sensors.put("tag_humidityLivingRoom", humidityLivingRoom);
         sensors.put("tag_temperatureCellar", temperatureCellar);
         sensors.put("tag_humidityCellar", humidityCellar);
+        sensors.put("tag_gardenWater", gardenWater);
         dayForecasts = new ArrayList<>();
         homematicSensors = new HashMap<>();
+        homematicSensors.put(hmPowerMeter.getMapKey(), hmPowerMeter);
         homematicSensors.put(hmTemperatureOut.getMapKey(), hmTemperatureOut);
         homematicSensors.put(humidityOut.getMapKey(), humidityOut);
         homematicSensors.put(rainCounterAll.getMapKey(), rainCounterAll);
@@ -93,6 +100,7 @@ public class WeatherRepository extends Observable {
         homematicSensors.put(humidityLivingRoom.getMapKey(), humidityLivingRoom);
         homematicSensors.put(temperatureCellar.getMapKey(), temperatureCellar);
         homematicSensors.put(humidityCellar.getMapKey(), humidityCellar);
+        homematicSensors.put(gardenWater.getMapKey(), gardenWater);
         readMeasurementsFromCsvFile();
     }
 

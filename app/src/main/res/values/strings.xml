@@ -23,6 +23,7 @@
     <string name="txt_date_time_default">Samstag 8. August 2015 10:34</string>
 
     <string name="tagRainToday">tag_rainToday</string>
+    <string name="tagHmPowerMeter">tag_hmPowerMeter</string>
     <string name="tagtemperatureOut">tag_temperatureOut</string>
     <string name="tagAirPressure">tag_airPressure</string>
     <string name="tagHmTemperatureOut">tag_hmTemperatureOut</string>
@@ -36,6 +37,7 @@
     <string name="tagHumidityLivingRoom">tag_humidityLivingRoom</string>
     <string name="tagTemperatureCellar">tag_temperatureCellar</string>
     <string name="tagHumidityCellar">tag_humidityCellar</string>
+    <string name="tagGardenWater">tag_gardenWater</string>
     <string name="txt_out">Aus</string>
     <string name="txt_ledwalltext">Text für Ledwall:</string>
     <string name="txt_color_changer">Farblichtwechsler</string>
@@ -43,5 +45,6 @@
     <string name="txt_default_info_text">Standardinformation</string>
     <string name="txt_fix_text_ledwall">Fixer Text für Ledwall</string>
     <string name="txt_ok">OK</string>
+    <string name="tv_power_meter">999W</string>
 
 </resources>

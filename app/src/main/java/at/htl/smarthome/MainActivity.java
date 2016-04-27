@@ -36,6 +36,7 @@ import java.util.Locale;
 import at.htl.smarthome.commandservice.CommandInterpreterService;
 import at.htl.smarthome.entity.Settings;
 import at.htl.smarthome.services.HomematicRpcHandler;
+import at.htl.smarthome.services.HttpCommunicationHandler;
 import at.htl.smarthome.view.ControlFragment;
 import at.htl.smarthome.view.LedWallFragment;
 import at.htl.smarthome.view.MainFragment;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
     BroadcastReceiver motionDetectorReceiver;
     MainFragment mainFragment;
     LedWallFragment ledWallFragment;
+    HttpCommunicationHandler htpHttpCommunicationHandler;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -210,15 +212,18 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         Log.d(LOG_TAG, "onResume() CommandInterpreterService gebunden");
         final Intent commandInterpreterServiceIntent = new Intent(this, CommandInterpreterService.class);
         bindService(commandInterpreterServiceIntent, commandInterpreterServiceConnection, Context.BIND_AUTO_CREATE);
+        htpHttpCommunicationHandler = new HttpCommunicationHandler();
+        htpHttpCommunicationHandler.startServer();
     }
 
     public void onPause() {
         unbindService(commandInterpreterServiceConnection);
         stopService(new Intent(this, CommandInterpreterService.class));
-        Log.d(LOG_TAG, "onResume() CommandServer gestoppt");
+        Log.d(LOG_TAG, "onPause() CommandServer gestoppt");
         if (motionDetectorReceiver != null) {
             unregisterReceiver(motionDetectorReceiver);
         }
+        htpHttpCommunicationHandler.stopServer();
         super.onPause();
     }
 
@@ -289,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
+            // Show 2 total pages.
             return 2;
         }
 

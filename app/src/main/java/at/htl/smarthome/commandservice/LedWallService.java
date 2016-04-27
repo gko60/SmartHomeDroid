@@ -74,9 +74,13 @@ public class LedWallService {
                         Sensor temperatureOut = WeatherRepository.getInstance().getSensor("tag_hmTemperatureOut");
                         command = "T" + Utils.getDoubleString(temperatureOut.getValue(), 1) + " Grad";
                         break;
+                    case 3:
+                        Sensor powerMeter = WeatherRepository.getInstance().getSensor("tag_hmPowerMeter");
+                        command = "T" + Utils.getDoubleString(powerMeter.getValue(), 0) + " Watt";
+                        break;
                 }
                 pageNumber++;
-                if (pageNumber >= 3) {
+                if (pageNumber >= 4) {
                     pageNumber = 0;
                 }
                 Log.d(LOG_TAG, "getCommand() pageNumber: " + pageNumber);
